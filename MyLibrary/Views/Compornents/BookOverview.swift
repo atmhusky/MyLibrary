@@ -19,12 +19,13 @@ struct BookOverview: View {
         HStack {
             
             if let thumbnailURL = thumbnailURL {
-                AsyncImage(url: thumbnailURL) { response in
-                    response.image?
+                AsyncImage(url: thumbnailURL) { image in
+                    image
                         .resizable()
                         .scaledToFit()
                         .frame(width: 50, height: 80)
-                    
+                } placeholder: {
+                    ProgressView()
                 }
             } else {
                 Image("no_image")

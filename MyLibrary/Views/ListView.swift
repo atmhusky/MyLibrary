@@ -22,9 +22,13 @@ struct ListView: View {
                         search
                     }
                     
-                    Section(header: Text("蔵書一覧")){
+                    Section("蔵書一覧"){
                         ForEach(1..<10, id: \.self) { item in
-                            bookItem
+                            NavigationLink {
+                                BookDetailView(isNewBook: false)
+                            } label: {
+                                BookOverviewRow(title: "本のタイトル", subTitle: "本のサブタイトル", author: "本の著者", thumbnailURL: URL(string: "https://books.google.com/books/content?id=G9BbLwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"))
+                            }
                         }
                     }
                 }
@@ -70,8 +74,6 @@ struct ListView: View {
             BookDetailView(isNewBook: true)
         }
     }
-    
-    
 }
 
 #Preview {
@@ -93,29 +95,6 @@ extension ListView {
             } label: {
                 Image(systemName: "barcode.viewfinder")
                     .font(.title2)
-            }
-        }
-    }
-    
-    private var bookItem: some View {
-        NavigationLink {
-            BookDetailView(isNewBook: false)
-        } label: {
-            HStack {
-                Image("no_image")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 50, height: 80)
-                
-                VStack(alignment: .leading) {
-                    Text("本のタイトル")
-                        .font(.body)
-                        .lineLimit(1)
-                    
-                    Text("本の著者")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
             }
         }
     }

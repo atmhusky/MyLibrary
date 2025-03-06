@@ -2,12 +2,14 @@ import SwiftUI
 
 struct BookDetailView: View {
     var isNewBook: Bool = false  // 新規登録であるか
-    @State private var isEditing: Bool // 編集中であるか
+    @State var isEditing: Bool // 編集中であるか
     
     // 表示確認用
-    @State private var title: String = "本のタイトル"
-    @State private var subTitle: String = "本のサブタイトル本のサブタイトル本のサブタイトル"
-    @State private var author: String = "本の著者"
+    @State var title: String = "本のタイトル"
+    @State var subTitle: String = "本のサブタイトル本のサブタイトル本のサブタイトル"
+    @State var author: String = "本の著者"
+    @State var thumbnailURL: URL? = URL(string: "https://books.google.com/books/content?id=G9BbLwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api")
+    
     @State private var description: String = "本の説明文をここに記述．本の説明文をここに記述．本の説明文をここに記述．本の説明文をここに記述．本の説明文をここに記述．"
     @State private var isbn: String = "1234567890123"
     @State private var pageCount: String = "0"
@@ -26,101 +28,21 @@ struct BookDetailView: View {
             List {
                 // 本の基本情報
                 Section {
-                    HStack {
-                        Image("no_image")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 70, height: 130)
-                        
-                        VStack(alignment: .leading) {
-                            if isEditing {
-                                TextField("タイトルを入力", text: $title, axis: .vertical)
-                                    .font(.body)
-                                
-                                TextField("サブタイトルを入力", text: $subTitle, axis: .vertical)
-                                    .font(.footnote)
-                                
-                                TextField("著者を入力", text: $author, axis: .vertical)
-                                    .font(.footnote)
-                            } else {
-                                Text(title)
-                                    .font(.body)
-                                    .lineLimit(1)
-                                
-                                if(subTitle != "") {
-                                    Text(subTitle)
-                                        .font(.footnote)
-                                }
-                                
-                                Text(author)
-                                    .font(.footnote)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
+                    if isEditing {
+                        BookOverviewEdit(title: $title, subTitle: $subTitle, author: $author, thumbnailURL: thumbnailURL)
+                    } else {
+                        BookOverviewRow(title: title, subTitle: subTitle, author: author,thumbnailURL: thumbnailURL, permitNewline: true)
                     }
                 }
                 
                 // 本の詳細情報
                 Section("本の詳細情報") {
-                    // 説明
-                    HStack(spacing: 10) {
-                        Image(systemName: "info.circle")
-                            .imageScale(.large)
-                        
-                        Text("説明")
-                            .foregroundStyle(.primary)
-                        
-                        Spacer()
-                        
-                        if isEditing {
-                            TextField("本の説明文", text: $description, axis: .vertical)
-                                .lineLimit(nil)
-                        } else {
-                            Text(description)
-                                .lineLimit(nil)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
                     
-                    // ISBN
-                    HStack(spacing: 10) {
-                        Image(systemName: "barcode")
-                            .imageScale(.large)
-                        
-                        Text("ISBN")
-                            .foregroundStyle(.primary)
-                        
-                        Spacer()
-                        
-                        if isEditing {
-                            TextField("本の説明文", text: $isbn, axis: .vertical)
-                                .lineLimit(nil)
-                        } else {
-                            Text(isbn)
-                                .lineLimit(nil)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
+                    BookDetailRow(bookDetail: .description, inputText: $description, isEditing: isEditing)
                     
-                    // ページ数
-                    HStack(spacing: 10) {
-                        Image(systemName: "book.pages")
-                            .imageScale(.large)
-                        
-                        Text("ページ数")
-                            .foregroundStyle(.primary)
-                        
-                        Spacer()
-                        
-                        if isEditing {
-                            TextField("本の説明文", text: $pageCount, axis: .vertical)
-                                .lineLimit(nil)
-                        } else {
-                            Text(pageCount)
-                                .lineLimit(nil)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
+                    BookDetailRow(bookDetail: .isbn, inputText: $isbn, isEditing: isEditing)
+                    
+                    BookDetailRow(bookDetail: .pageCount, inputText: $pageCount, isEditing: isEditing)
                     
                     // 出版日
                     HStack(spacing: 10) {
@@ -196,9 +118,12 @@ struct BookDetailView: View {
 }
 
 extension BookDetailView {
+    
     private func formattedDate(_ date: Date) -> String {
             let formatter = DateFormatter()
             formatter.dateFormat = "yyyy/MM/dd"
             return formatter.string(from: date)
-        }
+    }
+    
+    
 }

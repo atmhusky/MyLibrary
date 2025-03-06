@@ -47,12 +47,10 @@ struct ListView: View {
                     
                     ToolbarItemGroup(placement: .bottomBar) {
                         if editMode == .active {
-                            Spacer()
-                            
                             Button {
                                 exportItems()
                             } label: {
-                                Image(systemName: "square.and.arrow.up")
+                                Text("CSVへエクスポート")
                             }
                             
                             Spacer()
@@ -60,19 +58,16 @@ struct ListView: View {
                             Button {
                                 removeItems()
                             } label: {
-                                Image(systemName: "trash")
+                                Text("削除")
                                     .foregroundStyle(.red)
                             }
-                            
-                            Spacer()
-                            
                         }
                     }
                 }
             }
         }
         .sheet(isPresented: $isShowBookDetailView) {
-            BookDetailView()
+            BookDetailView(isNewBook: true)
         }
     }
     
@@ -104,7 +99,7 @@ extension ListView {
     
     private var bookItem: some View {
         NavigationLink {
-            BookDetailView()
+            BookDetailView(isNewBook: false)
         } label: {
             HStack {
                 Image("no_image")

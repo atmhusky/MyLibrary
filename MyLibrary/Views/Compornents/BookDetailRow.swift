@@ -17,13 +17,13 @@ struct BookDetailRow: View {
             Image(systemName: bookDetail.symbol)
                 .imageScale(.large)
             
-            Text("説明")
+            Text(bookDetail.itemName)
                 .foregroundStyle(.primary)
             
             Spacer()
             
             if isEditing {
-                TextField("本の説明文", text: $inputText, axis: .vertical)
+                TextField(bookDetail.textFieldText, text: $inputText, axis: .vertical)
                     .lineLimit(bookDetail.permitNewline ? nil : 1)
             } else {
                 Text(inputText)

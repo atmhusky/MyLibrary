@@ -43,7 +43,7 @@ extension BookDetail {
         case .isbn:
             "本のISBNコード"
         case .pageCount:
-           "本のページ数"
+            "本のページ数"
         }
     }
     

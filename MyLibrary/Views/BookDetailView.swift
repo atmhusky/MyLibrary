@@ -28,11 +28,7 @@ struct BookDetailView: View {
             List {
                 // 本の基本情報
                 Section {
-                    if isEditing {
-                        BookOverviewEdit(title: $title, subTitle: $subTitle, author: $author, thumbnailURL: thumbnailURL)
-                    } else {
-                        BookOverviewRow(title: title, subTitle: subTitle, author: author,thumbnailURL: thumbnailURL, permitNewline: true)
-                    }
+                    BookOverview(title: $title, subTitle: $subTitle, author: $author, thumbnailURL: thumbnailURL, isEditing: isEditing)
                 }
                 
                 // 本の詳細情報

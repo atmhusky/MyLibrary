@@ -2,26 +2,21 @@ import SwiftUI
 
 struct BookDetailView: View {
     var isNewBook: Bool = false  // 新規登録であるか
-    @State var isEditing: Bool // 編集中であるか
+    @State var isEditing: Bool = false // 編集中であるか
     
     // 表示確認用
-    @State var title: String = "本のタイトル"
-    @State var subTitle: String = "本のサブタイトル本のサブタイトル本のサブタイトル"
-    @State var author: String = "本の著者"
-    @State var thumbnailURL: URL? = URL(string: "https://books.google.com/books/content?id=G9BbLwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api")
+    @Binding var title: String
+    @Binding var subTitle: String
+    @Binding var author: String
+    var thumbnailURL: URL? = URL(string: "https://books.google.com/books/content?id=G9BbLwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api")
     
-    @State private var description: String = "本の説明文をここに記述．本の説明文をここに記述．本の説明文をここに記述．本の説明文をここに記述．本の説明文をここに記述．"
-    @State private var isbn: String = "1234567890123"
-    @State private var pageCount: String = "0"
-    @State private var publishedDate: Date? = nil
-    @State private var memo: String = "好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．"
+    @Binding var description: String
+    @Binding var isbn: String
+    @Binding var pageCount: String
+    @Binding var publishedDate: Date?
+    @Binding var memo: String
     
     @Environment(\.dismiss) private var dismiss
-    
-    init(isNewBook: Bool) {
-        self.isNewBook = isNewBook
-        _isEditing = State(initialValue: isNewBook) // 新規登録なら編集を有効化した状態に
-    }
     
     var body: some View {
         NavigationStack {
@@ -108,9 +103,30 @@ struct BookDetailView: View {
 }
 
 #Preview {
-    NavigationStack {
-        BookDetailView(isNewBook: false)
-    }
+    
+    // 表示確認用
+    @Previewable @State var title: String = "本のタイトル"
+    @Previewable @State var subTitle: String = "本のサブタイトル本のサブタイトル本のサブタイトル"
+    @Previewable @State var author: String = "本の著者"
+    @Previewable @State var thumbnailURL: URL? = URL(string: "https://books.google.com/books/content?id=G9BbLwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api")
+    
+    @Previewable @State var description: String = "本の説明文をここに記述．本の説明文をここに記述．本の説明文をここに記述．本の説明文をここに記述．本の説明文をここに記述．"
+    @Previewable @State var isbn: String = "1234567890123"
+    @Previewable @State var pageCount: String = "0"
+    @Previewable @State var publishedDate: Date? = nil
+    @Previewable @State var memo: String = "好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．"
+    
+    BookDetailView(
+        title: $title,
+        subTitle: $subTitle,
+        author: $author,
+        thumbnailURL: thumbnailURL,
+        description: $description,
+        isbn: $isbn,
+        pageCount: $pageCount,
+        publishedDate: $publishedDate,
+        memo: $memo
+    )
 }
 
 extension BookDetailView {

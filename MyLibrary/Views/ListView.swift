@@ -8,10 +8,22 @@ import SwiftUI
 
 struct ListView: View {
     
-    @State private var searchText = ""
-    @State private var isShowBookDetailView: Bool = false
-    @State private var selectedItems: Set<Int> = []
-    @State private var editMode: EditMode = .inactive
+    @State var searchText = ""
+    @State var isShowBookDetailView: Bool = false
+    @State var selectedItems: Set<Int> = []
+    @State var editMode: EditMode = .inactive
+    
+    // BookDetailViewに渡す表示確認用
+    @State var title: String = "本のタイトル"
+    @State var subTitle: String = "本のサブタイトル本のサブタイトル本のサブタイトル"
+    @State var author: String = "本の著者"
+    @State var thumbnailURL: URL? = URL(string: "https://books.google.com/books/content?id=G9BbLwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api")
+    
+    @State var description: String = "本の説明文をここに記述．本の説明文をここに記述．本の説明文をここに記述．本の説明文をここに記述．本の説明文をここに記述．"
+    @State var isbn: String = "1234567890123"
+    @State var pageCount: String = "0"
+    @State var publishedDate: Date? = nil
+    @State var memo: String = "好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．"
     
     var body: some View {
         NavigationStack {
@@ -25,9 +37,24 @@ struct ListView: View {
                     Section("蔵書一覧"){
                         ForEach(1..<10, id: \.self) { item in
                             NavigationLink {
-                                BookDetailView(isNewBook: false)
+                                BookDetailView(
+                                    title: $title,
+                                    subTitle: $subTitle,
+                                    author: $author,
+                                    thumbnailURL: thumbnailURL,
+                                    description: $description,
+                                    isbn: $isbn,
+                                    pageCount: $pageCount,
+                                    publishedDate: $publishedDate,
+                                    memo: $memo
+                                )
                             } label: {
-                                BookOverviewRow(title: "本のタイトル", subTitle: "本のサブタイトル", author: "本の著者", thumbnailURL: URL(string: "https://books.google.com/books/content?id=G9BbLwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"))
+                                BookOverview(
+                                    title: $title,
+                                    subTitle: $subTitle,
+                                    author: $author,
+                                    thumbnailURL: thumbnailURL
+                                )
                             }
                         }
                     }
@@ -71,7 +98,18 @@ struct ListView: View {
             }
         }
         .sheet(isPresented: $isShowBookDetailView) {
-            BookDetailView(isNewBook: true)
+            // 表示確認用・あとで消す
+            BookDetailView(
+                title: $title,
+                subTitle: $subTitle,
+                author: $author,
+                thumbnailURL: thumbnailURL,
+                description: $description,
+                isbn: $isbn,
+                pageCount: $pageCount,
+                publishedDate: $publishedDate,
+                memo: $memo
+            )
         }
     }
 }

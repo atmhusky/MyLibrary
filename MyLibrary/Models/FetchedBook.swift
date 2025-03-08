@@ -16,6 +16,7 @@ struct FetchedBook: Codable {
     
     struct VolumeInfo: Codable {
         let title: String
+        let subtitle: String
         let authors: [String]
         let publishedDate: String
         let description: String
@@ -30,8 +31,8 @@ struct FetchedBook: Codable {
     }
     
     struct ImageLinks: Codable {
-        let smallThumbnail: String?
-        let thumbnail: String?
+        let smallThumbnail: String
+        let thumbnail: String
     }
 }
 

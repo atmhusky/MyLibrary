@@ -4,6 +4,8 @@ struct BookDetailView: View {
     var isNewBook: Bool = false  // 新規登録であるか
     @State var isEditing: Bool = false // 編集中であるか
     
+    let bookViewModel = BookViewModel() // 表示確認用
+    
     // 表示確認用
     @Binding var title: String
     @Binding var subTitle: String

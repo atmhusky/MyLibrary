@@ -16,10 +16,10 @@ struct FetchedBook: Codable {
     
     struct VolumeInfo: Codable {
         let title: String
-        let subtitle: String
+        let subtitle: String?
         let authors: [String]
         let publishedDate: String
-        let description: String
+        let description: String?
         let industryIdentifiers: [IndustryIdentifier]
         let imageLinks: ImageLinks
         let pageCount: Int

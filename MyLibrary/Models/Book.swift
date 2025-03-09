@@ -12,22 +12,31 @@ class Book: Identifiable {
     var id: String
     var title: String
     var subtitle: String
-    var authors: [String]
+    var authors: String
     var bookDescription: String
     var publishedDate: String
     var imageUrl: URL?
-    var pageCount: Int
+    var pageCount: String
     var isbn13: String
+    var memo: String
     
-    init(id: String, title: String, subtitle: String, authors: [String], bookDescription: String, publishedDate: String, imageUrlString: String, pageCount: Int, isbn13: String) {
+    init(id: String, title: String, subtitle: String, authors: [String], bookDescription: String, publishedDate: String, imageUrlString: String, pageCount: Int, isbn13: String, memo: String = "") {
         self.id = id
         self.title = title
         self.subtitle = subtitle
-        self.authors = authors
+        self.authors = authors.joined(separator: ", ")
         self.bookDescription = bookDescription
         self.publishedDate = publishedDate
-        self.imageUrl = URL(string: imageUrlString)
-        self.pageCount = pageCount
+//        self.imageUrl = URL(string: imageUrlString)
+        self.pageCount = String(pageCount)
         self.isbn13 = isbn13
+        self.memo = memo
+        
+        // "http" を "https" に置き換え (こうしないと画像が表示されない)
+        if imageUrlString.hasPrefix("http://") {
+            self.imageUrl = URL(string: imageUrlString.replacingOccurrences(of: "http://", with: "https://"))
+        } else {
+            self.imageUrl = URL(string: imageUrlString)
+        }
     }
 }

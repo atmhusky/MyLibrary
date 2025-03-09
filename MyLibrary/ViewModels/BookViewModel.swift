@@ -4,23 +4,29 @@
 //  
 
 
-import Foundation
+import SwiftUI
+import SwiftData
 
-class BookViewModel {
+class BookViewModel: ObservableObject {
+    
+    @Environment(\.modelContext) private var modelContext
+    @Query private var items: [Item]
 
-    init() {
-        Task {
-            do {
-                let book = try await fetchBook(isbn: "9784297112134")
-                print(book.title)
-                print(book.subtitle)
-                print(book.bookDescription)
-                print(book.isbn13)
-            } catch {
-                print("本の取得に失敗: \(error)")
-            }
-        }
-    }
+//    init() {
+//        Task {
+//            do {
+//                let book = try await fetchBook(isbn: "9784297112134")
+//                print(book.title)
+////                print(book.subtitle)
+////                print(book.bookDescription)
+////                print(book.isbn13)
+//                
+//                addBook(book)
+//            } catch {
+//                print("本の取得に失敗: \(error)")
+//            }
+//        }
+//    }
     
     private func fetchBook(isbn: String) async throws -> Book {
         let urlString = "https://www.googleapis.com/books/v1/volumes?maxResults=1"  // 最上位の検索結果のみ取得
@@ -54,5 +60,13 @@ class BookViewModel {
         } catch {
             throw error
         }
+    }
+    
+    func addBook(_ book: Book) {
+        modelContext.insert(book)
+    }
+    
+    func deleteBook(_ book: Book) {
+        modelContext.delete(book)
     }
 }

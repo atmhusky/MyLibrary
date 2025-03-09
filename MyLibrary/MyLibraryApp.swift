@@ -11,7 +11,7 @@ import SwiftData
 struct MyLibraryApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Book.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -27,5 +27,6 @@ struct MyLibraryApp: App {
             ListView()
         }
         .modelContainer(sharedModelContainer)
+        .environmentObject(BookViewModel())
     }
 }

@@ -9,26 +9,26 @@ import SwiftData
 
 class BookViewModel: ObservableObject {
     
+//    private var modelContext: ModelContext
     @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-
-//    init() {
-//        Task {
-//            do {
-//                let book = try await fetchBook(isbn: "9784297112134")
-//                print(book.title)
-////                print(book.subtitle)
-////                print(book.bookDescription)
-////                print(book.isbn13)
-//                
-//                addBook(book)
-//            } catch {
-//                print("本の取得に失敗: \(error)")
-//            }
-//        }
-//    }
+    init() {
+//        self.modelContext = modelContext
+        Task {
+            do {
+                let book = try await fetchBook(isbn: "9784297112134")
+                print(book.title)
+//                print(book.subtitle)
+//                print(book.bookDescription)
+//                print(book.isbn13)
+                
+                addBook(book)
+            } catch {
+                print("本の取得に失敗: \(error)")
+            }
+        }
+    }
     
-    private func fetchBook(isbn: String) async throws -> Book {
+    func fetchBook(isbn: String) async throws -> Book {
         let urlString = "https://www.googleapis.com/books/v1/volumes?maxResults=1"  // 最上位の検索結果のみ取得
         guard var url = URL(string: urlString) else { throw URLError(.badURL) }
         url.append(queryItems: [.init(name: "q", value: isbn)])  // 公式のパラメータ isbn:は正常に取得できない場合が多かったのでキーワード検索で実施
@@ -44,7 +44,7 @@ class BookViewModel: ObservableObject {
             if isbn != bookItem.volumeInfo.industryIdentifiers[1].identifier {
                 throw NSError(domain: "BookViewModel", code: 0, userInfo: [NSLocalizedDescriptionKey: "入力と異なる本が取得されました"])
             }
-            
+            print(bookItem.volumeInfo.imageLinks.thumbnail)
             let book = Book(id: bookItem.id,
                         title: bookItem.volumeInfo.title,
                         subtitle: bookItem.volumeInfo.subtitle ?? "",
@@ -55,7 +55,8 @@ class BookViewModel: ObservableObject {
                         pageCount: bookItem.volumeInfo.pageCount,
                         isbn13: bookItem.volumeInfo.industryIdentifiers[1].identifier  // 13桁のISBNコード
             )
-            
+            print(book.imageUrl!)
+            addBook(book)
             return book
         } catch {
             throw error

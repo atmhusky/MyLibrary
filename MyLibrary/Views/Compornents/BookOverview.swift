@@ -43,10 +43,10 @@ struct BookOverview: View {
                         .font(.body)
                     
                     TextField("サブタイトルを入力", text: $book.subtitle, axis: .vertical)
-                        .font(.footnote)
+                        .font(.caption)
                     
                     TextField("著者を入力", text: $book.authors, axis: .vertical)
-                        .font(.footnote)
+                        .font(.caption)
                 } else {
                     Text(book.title)
                         .font(.body)
@@ -70,7 +70,7 @@ struct BookOverview: View {
 }
 
 #Preview {
-    let sampleBook = Book(id: "111",
+    let sampleBook = Book(
                           title: "タイトル",
                           subtitle: "サブタイトル",
                           authors: ["著者1", "著者2"],

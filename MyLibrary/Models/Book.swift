@@ -20,8 +20,8 @@ class Book: Identifiable {
     var isbn13: String
     var memo: String
     
-    init(id: String, title: String, subtitle: String, authors: [String], bookDescription: String, publishedDate: String, imageUrlString: String, pageCount: Int, isbn13: String, memo: String = "") {
-        self.id = id
+    init(title: String, subtitle: String, authors: [String], bookDescription: String, publishedDate: String, imageUrlString: String, pageCount: Int, isbn13: String, memo: String = "") {
+        self.id = UUID().uuidString
         self.title = title
         self.subtitle = subtitle
         self.authors = authors.joined(separator: ", ")

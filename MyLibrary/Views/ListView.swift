@@ -14,37 +14,44 @@ struct ListView: View {
     @EnvironmentObject var bookViewModel: BookViewModel
     
     @State var searchText = ""
-    @State var isShowBookDetailView: Bool = false
-    @State var selectedItems: Set<Int> = []
+    @State var selectedBooks: Set<String> = []
     @State var editMode: EditMode = .inactive
     @State var fetchedBook: Book?
-    
-    // 表示確認用
-    let sampleBook1 = Book(id: "G9BbLwEACAAJ", title: "タイポグラフィ・ハンドブック", subtitle: "", authors: ["小泉均"], bookDescription: "欧文組版のすべてが分かるハンドブック", publishedDate: "2012-06",                          imageUrlString: "https://books.google.com/books/content?id=G9BbLwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api", pageCount: 493, isbn13: "9784327377328")
-    let sampleBook2 = Book(id: "wm98zQEACAAJ", title: "Swift実践入門", subtitle: "直感的な文法と安全性を兼ね備えた言語", authors: ["石川洋資", "西山勇世"], bookDescription: "先進的な機能を駆使した簡潔でバグのないコード。Xcodeで動かしながら学ぶ基本、設計指針、実装パターン", publishedDate: "2020-04",                          imageUrlString: "https://books.google.com/books/content?id=wm98zQEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api", pageCount: 453, isbn13: "9784297112134")
-
+    @State var errorMessage: String? = nil
     
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
                 
-                // 動的な表示確認用
-                Button("表示用登録") {
-                    self.addBook(sampleBook1)
-                    self.addBook(sampleBook2)
-                }
-                
-                List(selection: $selectedItems) {
+                List(selection: $selectedBooks) {
                     Section("本の追加") {
                         search
                     }
                     
                     Section("蔵書一覧"){
+                        
+                        if books.isEmpty {
+                            VStack(alignment: .center) {
+                                Text("書籍が登録されていません")
+                                    .fontWeight(.bold)
+                                    .font(.title2)
+                                    .padding()
+                                
+                                Text("上の検索バーかバーコードのアイコンをタップして書籍を登録しましょう！")
+                                    .foregroundStyle(.secondary)
+                                    .padding([.leading, .bottom, .trailing])
+                            }
+                        }
+                        
                         ForEach(books) { book in
-                            NavigationLink {
-                                BookDetailView(book: book)
-                            } label: {
+                            if editMode == .active {
                                 BookOverview(book: book)
+                            } else {
+                                NavigationLink {
+                                    BookDetailView(book: book)
+                                } label: {
+                                    BookOverview(book: book)
+                                }
                             }
                         }
                     }
@@ -56,12 +63,14 @@ struct ListView: View {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button(editMode == .active ? "完了" : "選択") {
                             editMode = editMode == .active ? .inactive : .active
+                            selectedBooks = []
                         }
                     }
+                    
                     ToolbarItem(placement: .topBarLeading) {
                         if editMode == .active {
                             Button("すべて選択") {
-                                selectAllItems()
+                                selectAllBooks()
                             }
                         }
                     }
@@ -69,7 +78,7 @@ struct ListView: View {
                     ToolbarItemGroup(placement: .bottomBar) {
                         if editMode == .active {
                             Button {
-                                exportItems()
+                                bookViewModel.exportBooksToCSV(selectedBooks: selectedBooks ,modelContext: modelContext)
                             } label: {
                                 Text("CSVへエクスポート")
                             }
@@ -77,7 +86,8 @@ struct ListView: View {
                             Spacer()
                             
                             Button {
-                                removeItems()
+                                bookViewModel.deleteBooks(selectedBooks: selectedBooks, modelContext: modelContext)
+                                editMode = .inactive
                             } label: {
                                 Text("削除")
                                     .foregroundStyle(.red)
@@ -87,10 +97,8 @@ struct ListView: View {
                 }
             }
         }
-        .sheet(isPresented: $isShowBookDetailView) {
-            if let fetchedBook = fetchedBook {
-                BookDetailView(book: fetchedBook, isNewBook: true, isEditing: true)
-            }
+        .sheet(item: $fetchedBook) { book in
+            BookDetailView(book: book, isNewBook: true, isEditing: true)
         }
     }
 }
@@ -105,46 +113,56 @@ struct ListView: View {
 extension ListView {
     
     private var search: some View {
-        HStack {
-            TextField("ISBNコードを直接入力", text: $searchText)
-                .onSubmit {
-                    print(searchText)
-                    Task {
-                        do {
-                            fetchedBook = try await bookViewModel.fetchBook(isbn: searchText)
-                            addBook(fetchedBook!)
-//                            isShowBookDetailView = true
-                        } catch {
-                            print("検索したISBNの本は見つかりませんでした：\(error)")
+        VStack(alignment: .leading) {
+            HStack {
+                TextField("ISBNコードを入力(13桁の数字)", text: $searchText)
+                    .onSubmit {
+                        print(searchText)
+                        
+                        guard isValidISBN(searchText) else {
+                            errorMessage = "※ISBNコードは13桁の数字で入力してください"
+                            return
+                        }
+                        
+                        errorMessage = nil
+                        
+                        Task {
+                            do {
+                                fetchedBook = try await bookViewModel.fetchBook(isbn: searchText)
+                            } catch {
+                                print("検索したISBNの本は見つかりませんでした：\(error)")
+                                fetchedBook = bookViewModel.creareEmptyBook(isbn13: searchText)  // 検索した本が見つからない場合は空の登録フォームを表示する
+                            }
                         }
                     }
+                
+                Button {
+                    print("camera")
+                } label: {
+                    Image(systemName: "barcode.viewfinder")
+                        .font(.title2)
                 }
-            
-            Button {
-                print("camera")
-            } label: {
-                Image(systemName: "barcode.viewfinder")
-                    .font(.title2)
             }
+            
+            if let errorMessage = errorMessage {
+                Text(errorMessage)
+                    .foregroundColor(.red)
+                    .font(.caption)
+                    .transition(.opacity)
+            }
+            
         }
     }
     
-    private func removeItems() {
-        print("削除するアイテム: \(selectedItems)")
-        selectedItems.removeAll()
+    // すべての本を選択する
+    private func selectAllBooks() {
+        selectedBooks = Set(books.map { $0.id })
     }
     
-    private func exportItems() {
-        print("エクスポートするアイテム: \(selectedItems)")
-    }
-    
-    private func selectAllItems() {
-        selectedItems = Set(0..<10)
-    }
-    
-    func addBook(_ book: Book) {
-        modelContext.insert(book)
-        print("保存完了")
+    // 入力値のチェック (13桁の数字であるかどうかの判定)
+    private func isValidISBN(_ searchText: String) -> Bool {
+        let regex = #"^\d{13}$"#
+        return searchText.range(of: regex, options: .regularExpression) != nil
     }
     
 }

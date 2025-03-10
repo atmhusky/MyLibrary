@@ -57,6 +57,7 @@ struct ListView: View {
                     ToolbarItem(placement: .topBarTrailing) {
                         Button(editMode == .active ? "完了" : "選択") {
                             editMode = editMode == .active ? .inactive : .active
+                            selectedBooks = []
                         }
                     }
                     ToolbarItem(placement: .topBarLeading) {

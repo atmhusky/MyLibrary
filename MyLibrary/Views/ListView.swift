@@ -19,8 +19,8 @@ struct ListView: View {
     @State var fetchedBook: Book?
     
     // 表示確認用
-    let sampleBook1 = Book(id: "G9BbLwEACAAJ", title: "タイポグラフィ・ハンドブック", subtitle: "", authors: ["小泉均"], bookDescription: "欧文組版のすべてが分かるハンドブック", publishedDate: "2012-06",                          imageUrlString: "https://books.google.com/books/content?id=G9BbLwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api", pageCount: 493, isbn13: "9784327377328")
-    let sampleBook2 = Book(id: "wm98zQEACAAJ", title: "Swift実践入門", subtitle: "直感的な文法と安全性を兼ね備えた言語", authors: ["石川洋資", "西山勇世"], bookDescription: "先進的な機能を駆使した簡潔でバグのないコード。Xcodeで動かしながら学ぶ基本、設計指針、実装パターン", publishedDate: "2020-04",                          imageUrlString: "https://books.google.com/books/content?id=wm98zQEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api", pageCount: 453, isbn13: "9784297112134")
+    let sampleBook1 = Book(title: "タイポグラフィ・ハンドブック", subtitle: "", authors: ["小泉均"], bookDescription: "欧文組版のすべてが分かるハンドブック", publishedDate: "2012-06",                          imageUrlString: "https://books.google.com/books/content?id=G9BbLwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api", pageCount: 493, isbn13: "9784327377328")
+    let sampleBook2 = Book(title: "Swift実践入門", subtitle: "直感的な文法と安全性を兼ね備えた言語", authors: ["石川洋資", "西山勇世"], bookDescription: "先進的な機能を駆使した簡潔でバグのないコード。Xcodeで動かしながら学ぶ基本、設計指針、実装パターン", publishedDate: "2020-04",                          imageUrlString: "https://books.google.com/books/content?id=wm98zQEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api", pageCount: 453, isbn13: "9784297112134")
     
     var body: some View {
         NavigationStack {

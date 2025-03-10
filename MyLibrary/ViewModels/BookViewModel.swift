@@ -26,7 +26,7 @@ class BookViewModel: ObservableObject {
             if isbn != bookItem.volumeInfo.industryIdentifiers[1].identifier {
                 throw NSError(domain: "BookViewModel", code: 0, userInfo: [NSLocalizedDescriptionKey: "入力と異なる本が取得されました"])
             }
-            let book = Book(id: bookItem.id,
+            let book = Book(
                         title: bookItem.volumeInfo.title,
                         subtitle: bookItem.volumeInfo.subtitle ?? "",
                         authors: bookItem.volumeInfo.authors,
@@ -44,7 +44,7 @@ class BookViewModel: ObservableObject {
     
     // 空のBookを生成する
     func creareEmptyBook(isbn13: String) -> Book {
-        Book(id: UUID().uuidString, title: "", subtitle: "", authors: [], bookDescription: "", publishedDate: "", imageUrlString: "", pageCount: 0, isbn13: isbn13)
+        Book(title: "", subtitle: "", authors: [], bookDescription: "", publishedDate: "", imageUrlString: "", pageCount: 0, isbn13: isbn13)
     }
     
     // 本を新しく保存する

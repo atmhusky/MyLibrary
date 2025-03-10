@@ -101,7 +101,6 @@ struct BookDetailView: View {
     
     BookDetailView(book:
         Book(
-            id: "111",
             title: "タイトル",
             subtitle: "サブタイトル",
             authors: ["著者1", "著者2"],

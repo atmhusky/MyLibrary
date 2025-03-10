@@ -70,7 +70,7 @@ struct BookOverview: View {
 }
 
 #Preview {
-    let sampleBook = Book(id: "111",
+    let sampleBook = Book(
                           title: "タイトル",
                           subtitle: "サブタイトル",
                           authors: ["著者1", "著者2"],

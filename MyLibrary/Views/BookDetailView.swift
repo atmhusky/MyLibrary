@@ -18,7 +18,7 @@ struct BookDetailView: View {
             List {
                 // 本の基本情報
                 Section {
-                    BookOverview(book: book)
+                    BookOverview(book: book, isEditing: isEditing)
                 }
                 
                 // 本の詳細情報

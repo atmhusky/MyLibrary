@@ -5,29 +5,34 @@
 
 
 import SwiftUI
+import SwiftData
 
 struct ListView: View {
+    
+    @Environment(\.modelContext) private var modelContext
+    @Query private var books: [Book]
+    @EnvironmentObject var bookViewModel: BookViewModel
     
     @State var searchText = ""
     @State var isShowBookDetailView: Bool = false
     @State var selectedItems: Set<Int> = []
     @State var editMode: EditMode = .inactive
+    @State var fetchedBook: Book?
     
-    // BookDetailViewに渡す表示確認用
-    @State var title: String = "本のタイトル"
-    @State var subTitle: String = "本のサブタイトル本のサブタイトル本のサブタイトル"
-    @State var author: String = "本の著者"
-    @State var thumbnailURL: URL? = URL(string: "https://books.google.com/books/content?id=G9BbLwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api")
-    
-    @State var description: String = "本の説明文をここに記述．本の説明文をここに記述．本の説明文をここに記述．本の説明文をここに記述．本の説明文をここに記述．"
-    @State var isbn: String = "1234567890123"
-    @State var pageCount: String = "0"
-    @State var publishedDate: Date? = nil
-    @State var memo: String = "好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．好きなことをここにメモとして記録できる．"
+    // 表示確認用
+    let sampleBook1 = Book(id: "G9BbLwEACAAJ", title: "タイポグラフィ・ハンドブック", subtitle: "", authors: ["小泉均"], bookDescription: "欧文組版のすべてが分かるハンドブック", publishedDate: "2012-06",                          imageUrlString: "https://books.google.com/books/content?id=G9BbLwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api", pageCount: 493, isbn13: "9784327377328")
+    let sampleBook2 = Book(id: "wm98zQEACAAJ", title: "Swift実践入門", subtitle: "直感的な文法と安全性を兼ね備えた言語", authors: ["石川洋資", "西山勇世"], bookDescription: "先進的な機能を駆使した簡潔でバグのないコード。Xcodeで動かしながら学ぶ基本、設計指針、実装パターン", publishedDate: "2020-04",                          imageUrlString: "https://books.google.com/books/content?id=wm98zQEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api", pageCount: 453, isbn13: "9784297112134")
+
     
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                
+                // 動的な表示確認用
+                Button("表示用登録") {
+                    self.addBook(sampleBook1)
+                    self.addBook(sampleBook2)
+                }
                 
                 List(selection: $selectedItems) {
                     Section("本の追加") {
@@ -35,26 +40,11 @@ struct ListView: View {
                     }
                     
                     Section("蔵書一覧"){
-                        ForEach(1..<10, id: \.self) { item in
+                        ForEach(books) { book in
                             NavigationLink {
-                                BookDetailView(
-                                    title: $title,
-                                    subTitle: $subTitle,
-                                    author: $author,
-                                    thumbnailURL: thumbnailURL,
-                                    description: $description,
-                                    isbn: $isbn,
-                                    pageCount: $pageCount,
-                                    publishedDate: $publishedDate,
-                                    memo: $memo
-                                )
+                                BookDetailView(book: book)
                             } label: {
-                                BookOverview(
-                                    title: $title,
-                                    subTitle: $subTitle,
-                                    author: $author,
-                                    thumbnailURL: thumbnailURL
-                                )
+                                BookOverview(book: book)
                             }
                         }
                     }
@@ -98,24 +88,18 @@ struct ListView: View {
             }
         }
         .sheet(isPresented: $isShowBookDetailView) {
-            // 表示確認用・あとで消す
-            BookDetailView(
-                title: $title,
-                subTitle: $subTitle,
-                author: $author,
-                thumbnailURL: thumbnailURL,
-                description: $description,
-                isbn: $isbn,
-                pageCount: $pageCount,
-                publishedDate: $publishedDate,
-                memo: $memo
-            )
+            if let fetchedBook = fetchedBook {
+                BookDetailView(book: fetchedBook, isNewBook: true, isEditing: true)
+            }
         }
     }
 }
 
 #Preview {
+    
     ListView()
+        .modelContainer(for: Book.self, inMemory: true)
+        .environmentObject(BookViewModel())
 }
 
 extension ListView {
@@ -125,7 +109,15 @@ extension ListView {
             TextField("ISBNコードを直接入力", text: $searchText)
                 .onSubmit {
                     print(searchText)
-                    isShowBookDetailView = true
+                    Task {
+                        do {
+                            fetchedBook = try await bookViewModel.fetchBook(isbn: searchText)
+                            addBook(fetchedBook!)
+//                            isShowBookDetailView = true
+                        } catch {
+                            print("検索したISBNの本は見つかりませんでした：\(error)")
+                        }
+                    }
                 }
             
             Button {
@@ -149,4 +141,10 @@ extension ListView {
     private func selectAllItems() {
         selectedItems = Set(0..<10)
     }
+    
+    func addBook(_ book: Book) {
+        modelContext.insert(book)
+        print("保存完了")
+    }
+    
 }

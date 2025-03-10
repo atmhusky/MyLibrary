@@ -15,7 +15,7 @@ struct ListView: View {
     
     @State var searchText = ""
     @State var isShowBookDetailView: Bool = false
-    @State var selectedItems: Set<Int> = []
+    @State var selectedBooks: Set<String> = []
     @State var editMode: EditMode = .inactive
     @State var fetchedBook: Book?
     
@@ -34,7 +34,7 @@ struct ListView: View {
                     self.addBook(sampleBook2)
                 }
                 
-                List(selection: $selectedItems) {
+                List(selection: $selectedBooks) {
                     Section("本の追加") {
                         search
                     }
@@ -46,6 +46,7 @@ struct ListView: View {
                             } label: {
                                 BookOverview(book: book)
                             }
+                            .tag(book.id)
                         }
                     }
                 }
@@ -61,7 +62,7 @@ struct ListView: View {
                     ToolbarItem(placement: .topBarLeading) {
                         if editMode == .active {
                             Button("すべて選択") {
-                                selectAllItems()
+                                selectAllBooks()
                             }
                         }
                     }
@@ -69,7 +70,7 @@ struct ListView: View {
                     ToolbarItemGroup(placement: .bottomBar) {
                         if editMode == .active {
                             Button {
-                                exportItems()
+                                exportBooks()
                             } label: {
                                 Text("CSVへエクスポート")
                             }
@@ -77,7 +78,8 @@ struct ListView: View {
                             Spacer()
                             
                             Button {
-                                removeItems()
+                                deleteBooks()
+                                editMode = .inactive
                             } label: {
                                 Text("削除")
                                     .foregroundStyle(.red)
@@ -129,22 +131,43 @@ extension ListView {
         }
     }
     
-    private func removeItems() {
-        print("削除するアイテム: \(selectedItems)")
-        selectedItems.removeAll()
+    private func exportBooks() {
+        print("エクスポートする本: \(selectedBooks)")
     }
     
-    private func exportItems() {
-        print("エクスポートするアイテム: \(selectedItems)")
+    
+    private func selectAllBooks() {
+        selectedBooks = Set(books.map { $0.id })
     }
     
-    private func selectAllItems() {
-        selectedItems = Set(0..<10)
-    }
-    
+    // 本を新しく保存する
     func addBook(_ book: Book) {
         modelContext.insert(book)
         print("保存完了")
     }
     
+    // 選択した本を削除する
+    private func deleteBooks() {
+        print("削除する本: \(selectedBooks)")
+        if let books = fetchBooksById(ids: selectedBooks) {
+            for book in books {
+                modelContext.delete(book)
+                print("削除完了：\(book.id)")
+            }
+        }
+    }
+    
+    // 指定したIDの本を取得して返す
+    func fetchBooksById(ids: Set<String>) -> [Book]? {
+        let descriptor = FetchDescriptor<Book>(
+            predicate: #Predicate { ids.contains($0.id) }
+        )
+        
+        do {
+            return try modelContext.fetch(descriptor)
+        } catch {
+            print("指定したidの本は見つかりませんでした：\(error)")
+            return nil
+        }
+    }
 }

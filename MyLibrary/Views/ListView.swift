@@ -14,7 +14,6 @@ struct ListView: View {
     @EnvironmentObject var bookViewModel: BookViewModel
     
     @State var searchText = ""
-    @State var isShowBookDetailView: Bool = false
     @State var selectedBooks: Set<String> = []
     @State var editMode: EditMode = .inactive
     @State var fetchedBook: Book?
@@ -89,10 +88,8 @@ struct ListView: View {
                 }
             }
         }
-        .sheet(isPresented: $isShowBookDetailView) {
-            if let fetchedBook = fetchedBook {
-                BookDetailView(book: fetchedBook, isNewBook: true, isEditing: true)
-            }
+        .sheet(item: $fetchedBook) { book in
+            BookDetailView(book: book, isNewBook: true, isEditing: true)
         }
     }
 }
@@ -114,10 +111,9 @@ extension ListView {
                     Task {
                         do {
                             fetchedBook = try await bookViewModel.fetchBook(isbn: searchText)
-                            bookViewModel.addBook(fetchedBook!, modelContext: modelContext)
-//                            isShowBookDetailView = true
                         } catch {
                             print("検索したISBNの本は見つかりませんでした：\(error)")
+                            fetchedBook = bookViewModel.creareEmptyBook(isbn13: searchText)  // 検索した本が見つからない場合は空の登録フォームを表示する
                         }
                     }
                 }

@@ -42,6 +42,11 @@ class BookViewModel: ObservableObject {
         }
     }
     
+    // 空のBookを生成する
+    func creareEmptyBook(isbn13: String) -> Book {
+        Book(id: UUID().uuidString, title: "", subtitle: "", authors: [], bookDescription: "", publishedDate: "", imageUrlString: "", pageCount: 0, isbn13: isbn13)
+    }
+    
     // 本を新しく保存する
     func addBook(_ book: Book ,modelContext: ModelContext) {
         modelContext.insert(book)

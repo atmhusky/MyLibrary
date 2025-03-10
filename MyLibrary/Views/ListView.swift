@@ -22,7 +22,6 @@ struct ListView: View {
     // 表示確認用
     let sampleBook1 = Book(id: "G9BbLwEACAAJ", title: "タイポグラフィ・ハンドブック", subtitle: "", authors: ["小泉均"], bookDescription: "欧文組版のすべてが分かるハンドブック", publishedDate: "2012-06",                          imageUrlString: "https://books.google.com/books/content?id=G9BbLwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api", pageCount: 493, isbn13: "9784327377328")
     let sampleBook2 = Book(id: "wm98zQEACAAJ", title: "Swift実践入門", subtitle: "直感的な文法と安全性を兼ね備えた言語", authors: ["石川洋資", "西山勇世"], bookDescription: "先進的な機能を駆使した簡潔でバグのないコード。Xcodeで動かしながら学ぶ基本、設計指針、実装パターン", publishedDate: "2020-04",                          imageUrlString: "https://books.google.com/books/content?id=wm98zQEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api", pageCount: 453, isbn13: "9784297112134")
-
     
     var body: some View {
         NavigationStack {
@@ -30,8 +29,8 @@ struct ListView: View {
                 
                 // 動的な表示確認用
                 Button("表示用登録") {
-                    self.addBook(sampleBook1)
-                    self.addBook(sampleBook2)
+                    bookViewModel.addBook(sampleBook1, modelContext: modelContext)
+                    bookViewModel.addBook(sampleBook2, modelContext: modelContext)
                 }
                 
                 List(selection: $selectedBooks) {
@@ -71,7 +70,7 @@ struct ListView: View {
                     ToolbarItemGroup(placement: .bottomBar) {
                         if editMode == .active {
                             Button {
-                                exportBooks()
+                                bookViewModel.exportBooksToCSV(selectedBooks: selectedBooks ,modelContext: modelContext)
                             } label: {
                                 Text("CSVへエクスポート")
                             }
@@ -79,7 +78,7 @@ struct ListView: View {
                             Spacer()
                             
                             Button {
-                                deleteBooks()
+                                bookViewModel.deleteBooks(selectedBooks: selectedBooks, modelContext: modelContext)
                                 editMode = .inactive
                             } label: {
                                 Text("削除")
@@ -115,7 +114,7 @@ extension ListView {
                     Task {
                         do {
                             fetchedBook = try await bookViewModel.fetchBook(isbn: searchText)
-                            addBook(fetchedBook!)
+                            bookViewModel.addBook(fetchedBook!, modelContext: modelContext)
 //                            isShowBookDetailView = true
                         } catch {
                             print("検索したISBNの本は見つかりませんでした：\(error)")
@@ -132,43 +131,9 @@ extension ListView {
         }
     }
     
-    private func exportBooks() {
-        print("エクスポートする本: \(selectedBooks)")
-    }
-    
-    
+    // すべての本を選択する
     private func selectAllBooks() {
         selectedBooks = Set(books.map { $0.id })
     }
     
-    // 本を新しく保存する
-    func addBook(_ book: Book) {
-        modelContext.insert(book)
-        print("保存完了")
-    }
-    
-    // 選択した本を削除する
-    private func deleteBooks() {
-        print("削除する本: \(selectedBooks)")
-        if let books = fetchBooksById(ids: selectedBooks) {
-            for book in books {
-                modelContext.delete(book)
-                print("削除完了：\(book.id)")
-            }
-        }
-    }
-    
-    // 指定したIDの本を取得して返す
-    func fetchBooksById(ids: Set<String>) -> [Book]? {
-        let descriptor = FetchDescriptor<Book>(
-            predicate: #Predicate { ids.contains($0.id) }
-        )
-        
-        do {
-            return try modelContext.fetch(descriptor)
-        } catch {
-            print("指定したidの本は見つかりませんでした：\(error)")
-            return nil
-        }
-    }
 }

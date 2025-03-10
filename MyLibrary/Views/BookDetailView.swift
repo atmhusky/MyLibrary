@@ -83,7 +83,7 @@ struct BookDetailView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     if isEditing {
                         Button(isNewBook ? "登録" : "保存") {
-                            isNewBook ? bookViewModel.addBook(book) : updateBook(book)
+                            isNewBook ? bookViewModel.addBook(book, modelContext: modelContext) : bookViewModel.updateBook(book, modelContext: modelContext)
                             isNewBook ? dismiss() : isEditing.toggle()
                         }
                     } else {
@@ -123,8 +123,4 @@ extension BookDetailView {
         return formatter.string(from: date)
     }
     
-    func updateBook(_ book: Book) {
-        try? modelContext.save()
-        print("更新成功")
-    }
 }

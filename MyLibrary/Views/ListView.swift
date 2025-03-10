@@ -44,12 +44,15 @@ struct ListView: View {
                         }
                         
                         ForEach(books) { book in
-                            NavigationLink {
-                                BookDetailView(book: book)
-                            } label: {
+                            if editMode == .active {
                                 BookOverview(book: book)
+                            } else {
+                                NavigationLink {
+                                    BookDetailView(book: book)
+                                } label: {
+                                    BookOverview(book: book)
+                                }
                             }
-                            .tag(book.id)
                         }
                     }
                 }

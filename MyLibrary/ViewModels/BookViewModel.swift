@@ -70,14 +70,53 @@ class BookViewModel: ObservableObject {
         }
     }
     
-    // 選択した本をCSV形式でエクスポートする
-    func exportBooksToCSV(selectedBooks: Set<String> ,modelContext: ModelContext) {
-        print("エクスポートする本: \(selectedBooks)")
+    //
+    func exportBooksToCSV(selectedBooks: Set<String> ,modelContext: ModelContext) -> URL? {
+        
+        if let csvString = generateCSV(selectedBooks: selectedBooks, modelContext: modelContext) {
+            let fileName = "MyLibrary.csv"
+            let tmpURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
+            
+            do {
+                try csvString.write(to: tmpURL, atomically: true, encoding: .utf8)
+                return tmpURL
+            } catch {
+                print("CSVの保存に失敗しました：\(error)")
+                return nil
+            }
+        } else {
+            return nil
+        }
     }
     
+    // 選択した本をCSV形式の文字列として生成する
+    private func generateCSV(selectedBooks: Set<String> ,modelContext: ModelContext) -> String? {
+        print("エクスポートする本: \(selectedBooks)")
+        
+        var csvString = "ID,Title,Subtitle,Authors,Description,PublishedDate,PageCount,ISBN13\n"
+        
+        if let books = fetchBooksById(ids: selectedBooks, modelContext: modelContext) {
+            for book in books {
+                // authorsはカンマ区切りなので，セミコロンに変換する
+                let authorsSemicolon = book.authors
+                    .split(separator: ",")
+                    .map { $0.trimmingCharacters(in: .whitespaces) }
+                    .joined(separator: ";")
+                // CSVでダブルクォーテーションを扱えるように変換
+                let escapedDescription = book.bookDescription.replacingOccurrences(of: "\"", with: "\"\"")
+                
+                csvString += """
+                "\(book.id)","\(book.title)","\(book.subtitle)","\(authorsSemicolon)","\(escapedDescription)","\(book.publishedDate)",\(book.pageCount),\(book.isbn13)
+                """
+            }
+            return csvString
+        } else {
+            return nil
+        }
+    }
     
     // 指定したIDの本を取得して返す
-    func fetchBooksById(ids: Set<String>, modelContext: ModelContext) -> [Book]? {
+    private func fetchBooksById(ids: Set<String>, modelContext: ModelContext) -> [Book]? {
         let descriptor = FetchDescriptor<Book>(
             predicate: #Predicate { ids.contains($0.id) }
         )

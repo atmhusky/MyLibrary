@@ -20,7 +20,7 @@ class Book: Identifiable {
     var isbn13: String
     var memo: String
     
-    init(title: String, subtitle: String, authors: [String], bookDescription: String, publishedDate: String, imageUrlString: String, pageCount: Int, isbn13: String, memo: String = "") {
+    init(title: String, subtitle: String, authors: [String], bookDescription: String, publishedDate: String, imageUrlString: String?, pageCount: Int, isbn13: String, memo: String = "") {
         self.id = UUID().uuidString
         self.title = title
         self.subtitle = subtitle
@@ -33,10 +33,14 @@ class Book: Identifiable {
         self.memo = memo
         
         // "http" を "https" に置き換え (こうしないと画像が表示されない)
-        if imageUrlString.hasPrefix("http://") {
-            self.imageUrl = URL(string: imageUrlString.replacingOccurrences(of: "http://", with: "https://"))
+        if let imageUrlString = imageUrlString {
+            if imageUrlString.hasPrefix("http://") {
+                self.imageUrl = URL(string: imageUrlString.replacingOccurrences(of: "http://", with: "https://"))
+            } else {
+                self.imageUrl = URL(string: imageUrlString)
+            }
         } else {
-            self.imageUrl = URL(string: imageUrlString)
+            self.imageUrl = nil
         }
     }
 }

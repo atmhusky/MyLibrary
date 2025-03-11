@@ -92,10 +92,10 @@ class BookViewModel: ObservableObject {
     // 選択した本をCSV形式の文字列として生成する
     private func generateCSV(selectedBooks: Set<String> ,modelContext: ModelContext) -> String? {
         print("エクスポートする本: \(selectedBooks)")
-        
-        var csvString = "ID,Title,Subtitle,Authors,Description,PublishedDate,PageCount,ISBN13\n"
-        
-        if let books = fetchBooksById(ids: selectedBooks, modelContext: modelContext) {
+
+        if let books = fetchBooksById(ids: selectedBooks, modelContext: modelContext), !books.isEmpty {
+            var csvString = "ID,Title,Subtitle,Authors,Description,PublishedDate,PageCount,ISBN13\n"
+
             for book in books {
                 // authorsはカンマ区切りなので，セミコロンに変換する
                 let authorsSemicolon = book.authors
@@ -106,9 +106,10 @@ class BookViewModel: ObservableObject {
                 let escapedDescription = book.bookDescription.replacingOccurrences(of: "\"", with: "\"\"")
                 
                 csvString += """
-                "\(book.id)","\(book.title)","\(book.subtitle)","\(authorsSemicolon)","\(escapedDescription)","\(book.publishedDate)",\(book.pageCount),\(book.isbn13)
+                "\(book.id)","\(book.title)","\(book.subtitle)","\(authorsSemicolon)","\(escapedDescription)","\(book.publishedDate)",\(book.pageCount),\(book.isbn13)\n
                 """
             }
+
             return csvString
         } else {
             return nil

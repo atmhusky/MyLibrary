@@ -6,13 +6,30 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		52E07D422D80CDAA007A2D2F /* CodeScanner in Frameworks */ = {isa = PBXBuildFile; productRef = 52E07D412D80CDAA007A2D2F /* CodeScanner */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		52E07C402D7879B0007A2D2F /* MyLibrary.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MyLibrary.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		52E07D3F2D80CCAB007A2D2F /* Exceptions for "MyLibrary" folder in "MyLibrary" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 52E07C3F2D7879B0007A2D2F /* MyLibrary */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		52E07C422D7879B0007A2D2F /* MyLibrary */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				52E07D3F2D80CCAB007A2D2F /* Exceptions for "MyLibrary" folder in "MyLibrary" target */,
+			);
 			path = MyLibrary;
 			sourceTree = "<group>";
 		};
@@ -23,6 +40,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				52E07D422D80CDAA007A2D2F /* CodeScanner in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +83,7 @@
 			);
 			name = MyLibrary;
 			packageProductDependencies = (
+				52E07D412D80CDAA007A2D2F /* CodeScanner */,
 			);
 			productName = MyLibrary;
 			productReference = 52E07C402D7879B0007A2D2F /* MyLibrary.app */;
@@ -94,6 +113,9 @@
 			);
 			mainGroup = 52E07C372D7879B0007A2D2F;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				52E07D402D80CDAA007A2D2F /* XCRemoteSwiftPackageReference "CodeScanner" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 52E07C412D7879B0007A2D2F /* Products */;
 			projectDirPath = "";
@@ -255,6 +277,8 @@
 				DEVELOPMENT_TEAM = LP86G2G3A2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MyLibrary/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "ISBNコードを読み取るためにカメラを利用します";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -285,6 +309,8 @@
 				DEVELOPMENT_TEAM = LP86G2G3A2;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MyLibrary/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "ISBNコードを読み取るためにカメラを利用します";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -326,6 +352,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		52E07D402D80CDAA007A2D2F /* XCRemoteSwiftPackageReference "CodeScanner" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/twostraws/CodeScanner";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		52E07D412D80CDAA007A2D2F /* CodeScanner */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 52E07D402D80CDAA007A2D2F /* XCRemoteSwiftPackageReference "CodeScanner" */;
+			productName = CodeScanner;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 52E07C382D7879B0007A2D2F /* Project object */;
 }

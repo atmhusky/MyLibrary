@@ -6,6 +6,7 @@
 
 import SwiftUI
 import SwiftData
+import CodeScanner
 
 struct ListView: View {
     
@@ -18,6 +19,8 @@ struct ListView: View {
     @State var editMode: EditMode = .inactive
     @State var fetchedBook: Book?
     @State var errorMessage: String? = nil
+    @State var isOpenScanner = false
+    @State private var scannedCode = ""
     
     var body: some View {
         NavigationStack {
@@ -100,7 +103,26 @@ struct ListView: View {
         .sheet(item: $fetchedBook) { book in
             BookDetailView(book: book, isNewBook: true, isEditing: true)
         }
-
+        .sheet(isPresented: $isOpenScanner) {
+            CodeScannerView(codeTypes: [.ean13], showViewfinder: true) { response in
+                switch response {
+                case .success(let result):
+                    print("スキャンしたコード：\(result.string)")
+                    scannedCode = result.string
+                    isOpenScanner = false
+                    Task {
+                        do {
+                            fetchedBook = try await bookViewModel.fetchBook(isbn: scannedCode)
+                        } catch {
+                            print("検索したISBNの本は見つかりませんでした：\(error)")
+                            fetchedBook = bookViewModel.creareEmptyBook(isbn13: searchText)  // 検索した本が見つからない場合は空の登録フォームを表示する
+                        }
+                    }
+                case .failure(let error):
+                    print(error.localizedDescription)
+                }
+            }
+        }
     }
 }
 
@@ -139,6 +161,7 @@ extension ListView {
                 
                 Button {
                     print("camera")
+                    isOpenScanner = true
                 } label: {
                     Image(systemName: "barcode.viewfinder")
                         .font(.title2)

@@ -6,6 +6,7 @@
 
 import SwiftUI
 import SwiftData
+import CodeScanner
 
 struct ListView: View {
     
@@ -18,6 +19,7 @@ struct ListView: View {
     @State var editMode: EditMode = .inactive
     @State var fetchedBook: Book?
     @State var errorMessage: String? = nil
+    @State var isOpenScanner = false
     
     var body: some View {
         NavigationStack {
@@ -100,7 +102,9 @@ struct ListView: View {
         .sheet(item: $fetchedBook) { book in
             BookDetailView(book: book, isNewBook: true, isEditing: true)
         }
-
+        .sheet(isPresented: $isOpenScanner) {
+            BarcodeScanView(isOpenScanner: $isOpenScanner, fetchedBook: $fetchedBook)
+        }
     }
 }
 
@@ -139,6 +143,7 @@ extension ListView {
                 
                 Button {
                     print("camera")
+                    isOpenScanner = true
                 } label: {
                     Image(systemName: "barcode.viewfinder")
                         .font(.title2)

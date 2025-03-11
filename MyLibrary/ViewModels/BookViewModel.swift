@@ -23,16 +23,17 @@ class BookViewModel: ObservableObject {
             let bookItem = response.items[0]  // 検索結果は配列になるが，1件しか取得していないので0番で固定
             
             // 最上位の検索結果が異なる本であった場合は見つからなかったと判定する (API変更の検討の余地あり)
-            if isbn != bookItem.volumeInfo.industryIdentifiers[1].identifier {
+            guard bookItem.volumeInfo.industryIdentifiers.first(where: { $0.type == "ISBN_13" && $0.identifier == isbn }) != nil else {
                 throw NSError(domain: "BookViewModel", code: 0, userInfo: [NSLocalizedDescriptionKey: "入力と異なる本が取得されました"])
             }
+            
             let book = Book(
                         title: bookItem.volumeInfo.title,
                         subtitle: bookItem.volumeInfo.subtitle ?? "",
-                        authors: bookItem.volumeInfo.authors,
+                        authors: bookItem.volumeInfo.authors ?? [],
                         bookDescription: bookItem.volumeInfo.description ?? "",
                         publishedDate: bookItem.volumeInfo.publishedDate,
-                        imageUrlString: bookItem.volumeInfo.imageLinks.thumbnail,  // 高画質のサムネイルのURL
+                        imageUrlString: bookItem.volumeInfo.imageLinks?.thumbnail ?? nil,  // 高画質のサムネイルのURL
                         pageCount: bookItem.volumeInfo.pageCount,
                         isbn13: bookItem.volumeInfo.industryIdentifiers[1].identifier  // 13桁のISBNコード
             )

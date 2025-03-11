@@ -76,16 +76,16 @@ struct ListView: View {
                     }
                     
                     ToolbarItemGroup(placement: .bottomBar) {
-                        if editMode == .active {
-                            Button {
-                                bookViewModel.exportBooksToCSV(selectedBooks: selectedBooks ,modelContext: modelContext)
-                            } label: {
-                                Text("CSVへエクスポート")
+                        if editMode == .active && !selectedBooks.isEmpty {
+                            if let csvURL = bookViewModel.exportBooksToCSV(selectedBooks: selectedBooks, modelContext: modelContext) {
+                                ShareLink(item: csvURL) {
+                                    Text("CSVへエクスポート")
+                                }
                             }
                             
                             Spacer()
                             
-                            Button {
+                            Button(role: .destructive) {
                                 bookViewModel.deleteBooks(selectedBooks: selectedBooks, modelContext: modelContext)
                                 editMode = .inactive
                             } label: {
@@ -100,6 +100,7 @@ struct ListView: View {
         .sheet(item: $fetchedBook) { book in
             BookDetailView(book: book, isNewBook: true, isEditing: true)
         }
+
     }
 }
 

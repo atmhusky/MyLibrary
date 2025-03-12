@@ -20,6 +20,7 @@ struct ListView: View {
     @State var fetchedBook: Book?
     @State var errorMessage: String? = nil
     @State var isOpenScanner = false
+    @State var isShowAlert = false
     
     var body: some View {
         NavigationStack {
@@ -88,11 +89,19 @@ struct ListView: View {
                             Spacer()
                             
                             Button(role: .destructive) {
-                                bookViewModel.deleteBooks(selectedBooks: selectedBooks, modelContext: modelContext)
-                                editMode = .inactive
+                                isShowAlert = true
                             } label: {
                                 Text("削除")
                                     .foregroundStyle(.red)
+                            }
+                            .alert("警告", isPresented: $isShowAlert) {
+                                Button("キャンセル", role: .cancel) {}
+                                Button("削除", role: .destructive) {
+                                    bookViewModel.deleteBooks(selectedBooks: selectedBooks, modelContext: modelContext)
+                                    editMode = .inactive
+                                }
+                            } message: {
+                                Text("選択した本を削除します。この操作は取り消せません。")
                             }
                         }
                     }

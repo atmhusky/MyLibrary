@@ -27,14 +27,12 @@ struct ListView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                
                 List(selection: $selectedBooks) {
                     Section("本の追加") {
                         search
                     }
                     
                     Section("蔵書一覧"){
-                        
                         if books.isEmpty {
                             VStack(alignment: .center) {
                                 Text("書籍が登録されていません")
@@ -137,28 +135,31 @@ extension ListView {
         VStack(alignment: .leading) {
             HStack {
                 TextField("ISBNコードを入力(13桁の数字)", text: $searchText)
+                    .keyboardType(.numberPad)
                     .focused(self.$keyboardFocus)
-                    .onSubmit {
-                        print(searchText)
-                        
-                        guard bookViewModel.isValidISBN(searchText) else {
-                            errorMessage = "※入力されたのはISBNコードではありません。\n978から始まる13桁の数字を入力してください。"
-                            return
-                        }
-                        
-                        guard bookViewModel.hasDuplicateBook(isbn: searchText, modelContext: modelContext) else {
-                            errorMessage = "※入力されたISBNコードの書籍は既に登録済みです。"
-                            return
-                        }
-                        
-                        errorMessage = nil
-                        
-                        Task {
-                            do {
-                                fetchedBook = try await bookViewModel.fetchBook(isbn: searchText)
-                            } catch {
-                                print("検索したISBNの本は見つかりませんでした：\(error)")
-                                fetchedBook = bookViewModel.creareEmptyBook(isbn13: searchText)  // 検索した本が見つからない場合は空の登録フォームを表示する
+                    .onChange(of: searchText) { _, searchText in
+                        if searchText.count == 13 {
+                            print(searchText)
+                            
+                            guard bookViewModel.isValidISBN(searchText) else {
+                                errorMessage = "※入力されたのはISBNコードではありません。\n978から始まる13桁の数字を入力してください。"
+                                return
+                            }
+                            
+                            guard bookViewModel.hasDuplicateBook(isbn: searchText, modelContext: modelContext) else {
+                                errorMessage = "※入力されたISBNコードの書籍は既に登録済みです。"
+                                return
+                            }
+                            
+                            errorMessage = nil
+                            
+                            Task {
+                                do {
+                                    fetchedBook = try await bookViewModel.fetchBook(isbn: searchText)
+                                } catch {
+                                    print("検索したISBNの本は見つかりませんでした：\(error)")
+                                    fetchedBook = bookViewModel.creareEmptyBook(isbn13: searchText)  // 検索した本が見つからない場合は空の登録フォームを表示する
+                                }
                             }
                         }
                     }

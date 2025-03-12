@@ -114,7 +114,7 @@ struct ListView: View {
             BookDetailView(book: book, isNewBook: true, isEditing: true)
         })
         .sheet(isPresented: $isOpenScanner) {
-            BarcodeScanView(isOpenScanner: $isOpenScanner, fetchedBook: $fetchedBook)
+            BarcodeScanView(isOpenScanner: $isOpenScanner, fetchedBook: $fetchedBook, errorMessage: $errorMessage)
         }
     }
 }
@@ -135,8 +135,13 @@ extension ListView {
                     .onSubmit {
                         print(searchText)
                         
-                        guard isValidISBN(searchText) else {
+                        guard bookViewModel.isValidISBN(searchText) else {
                             errorMessage = "※入力されたのはISBNコードではありません。\n978から始まる13桁の数字を入力してください。"
+                            return
+                        }
+                        
+                        guard bookViewModel.hasDuplicateBook(isbn: searchText, modelContext: modelContext) else {
+                            errorMessage = "※入力されたISBNコードの書籍は既に登録済みです。"
                             return
                         }
                         
@@ -174,15 +179,6 @@ extension ListView {
     // すべての本を選択する
     private func selectAllBooks() {
         selectedBooks = Set(books.map { $0.id })
-    }
-    
-    // 入力値のチェック (13桁の数字であるかどうかの判定)
-    private func isValidISBN(_ searchText: String) -> Bool {
-        let regex = #"^\d{13}$"#
-        guard searchText.range(of: regex, options: .regularExpression) != nil else {
-            return false
-        }
-        return searchText.hasPrefix("978")
     }
     
 }

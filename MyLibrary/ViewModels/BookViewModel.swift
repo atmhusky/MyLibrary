@@ -1,7 +1,7 @@
 //
 //  BookViewModel.swift
 //  MyLibrary
-//  
+//
 
 
 import SwiftUI
@@ -19,7 +19,7 @@ class BookViewModel: ObservableObject {
             let (data, _) = try await URLSession.shared.data(from: url)
             let decoder = JSONDecoder()
             let response = try decoder.decode(FetchedBook.self, from: data)
-
+            
             let bookItem = response.items[0]  // 検索結果は配列になるが，1件しか取得していないので0番で固定
             
             // 最上位の検索結果が異なる本であった場合は見つからなかったと判定する (API変更の検討の余地あり)
@@ -28,14 +28,14 @@ class BookViewModel: ObservableObject {
             }
             
             let book = Book(
-                        title: bookItem.volumeInfo.title,
-                        subtitle: bookItem.volumeInfo.subtitle ?? "",
-                        authors: bookItem.volumeInfo.authors ?? [],
-                        bookDescription: bookItem.volumeInfo.description ?? "",
-                        publishedDate: bookItem.volumeInfo.publishedDate,
-                        imageUrlString: bookItem.volumeInfo.imageLinks?.thumbnail ?? nil,  // 高画質のサムネイルのURL
-                        pageCount: bookItem.volumeInfo.pageCount,
-                        isbn13: bookItem.volumeInfo.industryIdentifiers[1].identifier  // 13桁のISBNコード
+                title: bookItem.volumeInfo.title,
+                subtitle: bookItem.volumeInfo.subtitle ?? "",
+                authors: bookItem.volumeInfo.authors ?? [],
+                bookDescription: bookItem.volumeInfo.description ?? "",
+                publishedDate: bookItem.volumeInfo.publishedDate,
+                imageUrlString: bookItem.volumeInfo.imageLinks?.thumbnail ?? nil,  // 高画質のサムネイルのURL
+                pageCount: bookItem.volumeInfo.pageCount,
+                isbn13: bookItem.volumeInfo.industryIdentifiers[1].identifier  // 13桁のISBNコード
             )
             return book
         } catch {
@@ -93,10 +93,10 @@ class BookViewModel: ObservableObject {
     // 選択した本をCSV形式の文字列として生成する
     private func generateCSV(selectedBooks: Set<String> ,modelContext: ModelContext) -> String? {
         print("エクスポートする本: \(selectedBooks)")
-
+        
         if let books = fetchBooksById(ids: selectedBooks, modelContext: modelContext), !books.isEmpty {
             var csvString = "ID,Title,Subtitle,Authors,Description,PublishedDate,PageCount,ISBN13\n"
-
+            
             for book in books {
                 // authorsはカンマ区切りなので，セミコロンに変換する
                 let authorsSemicolon = book.authors
@@ -110,7 +110,7 @@ class BookViewModel: ObservableObject {
                 "\(book.id)","\(book.title)","\(book.subtitle)","\(authorsSemicolon)","\(escapedDescription)","\(book.publishedDate)",\(book.pageCount),\(book.isbn13)\n
                 """
             }
-
+            
             return csvString
         } else {
             return nil
@@ -128,6 +128,30 @@ class BookViewModel: ObservableObject {
         } catch {
             print("指定したidの検索に失敗しました：\(error)")
             return nil
+        }
+    }
+    
+    // 入力値のチェック (13桁の数字であるかどうかの判定)
+    func isValidISBN(_ searchText: String) -> Bool {
+        let regex = #"^\d{13}$"#
+        guard searchText.range(of: regex, options: .regularExpression) != nil else {
+            return false
+        }
+        return searchText.hasPrefix("978")
+    }
+    
+    // 登録しようとしている本のISBNコードが重複しているかを判定
+    func hasDuplicateBook(isbn: String, modelContext: ModelContext) -> Bool {
+        let descriptor = FetchDescriptor<Book>(
+            predicate: #Predicate { $0.isbn13 == isbn }
+        )
+        
+        do {
+            let existingBooks = try modelContext.fetch(descriptor)
+            return existingBooks.isEmpty
+        } catch {
+            print("重複チェックに失敗しました：\(error)")
+            return false
         }
     }
 }

@@ -9,9 +9,12 @@ import CodeScanner
 
 struct BarcodeScanView: View {
     
+    @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject var bookViewModel: BookViewModel
+    
     @Binding var isOpenScanner: Bool
     @Binding var fetchedBook: Book?
-    @EnvironmentObject var bookViewModel: BookViewModel
+    @Binding var errorMessage: String?
     
     var body: some View {
         NavigationStack {
@@ -25,6 +28,19 @@ struct BarcodeScanView: View {
                         print("スキャンしたコード：\(result.string)")
                         let scannedCode = result.string
                         isOpenScanner = false
+                        
+                        guard bookViewModel.isValidISBN(scannedCode) else {
+                            errorMessage = "※入力されたのはISBNコードではありません。\n978から始まる13桁の数字を入力してください。"
+                            return
+                        }
+                        
+                        guard bookViewModel.hasDuplicateBook(isbn: scannedCode, modelContext: modelContext) else {
+                            errorMessage = "※入力されたISBNコードの書籍は既に登録済みです。"
+                            return
+                        }
+                        
+                        errorMessage = nil
+                        
                         Task {
                             do {
                                 fetchedBook = try await bookViewModel.fetchBook(isbn: scannedCode)

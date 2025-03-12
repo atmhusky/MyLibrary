@@ -22,6 +22,8 @@ struct ListView: View {
     @State var isOpenScanner = false
     @State var isShowAlert = false
     
+    @FocusState var keyboardFocus: Bool
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -108,6 +110,9 @@ struct ListView: View {
                 }
             }
         }
+        .onTapGesture {
+            keyboardFocus = false
+        }
         .sheet(item: $fetchedBook, onDismiss: {
             searchText = ""
         }, content: { book in
@@ -132,6 +137,7 @@ extension ListView {
         VStack(alignment: .leading) {
             HStack {
                 TextField("ISBNコードを入力(13桁の数字)", text: $searchText)
+                    .focused(self.$keyboardFocus)
                     .onSubmit {
                         print(searchText)
                         

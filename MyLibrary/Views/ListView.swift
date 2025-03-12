@@ -125,7 +125,7 @@ extension ListView {
                         print(searchText)
                         
                         guard isValidISBN(searchText) else {
-                            errorMessage = "※ISBNコードは13桁の数字で入力してください"
+                            errorMessage = "※入力されたのはISBNコードではありません。\n978から始まる13桁の数字を入力してください。"
                             return
                         }
                         
@@ -168,7 +168,10 @@ extension ListView {
     // 入力値のチェック (13桁の数字であるかどうかの判定)
     private func isValidISBN(_ searchText: String) -> Bool {
         let regex = #"^\d{13}$"#
-        return searchText.range(of: regex, options: .regularExpression) != nil
+        guard searchText.range(of: regex, options: .regularExpression) != nil else {
+            return false
+        }
+        return searchText.hasPrefix("978")
     }
     
 }

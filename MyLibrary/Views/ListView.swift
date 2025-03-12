@@ -99,9 +99,11 @@ struct ListView: View {
                 }
             }
         }
-        .sheet(item: $fetchedBook) { book in
+        .sheet(item: $fetchedBook, onDismiss: {
+            searchText = ""
+        }, content: { book in
             BookDetailView(book: book, isNewBook: true, isEditing: true)
-        }
+        })
         .sheet(isPresented: $isOpenScanner) {
             BarcodeScanView(isOpenScanner: $isOpenScanner, fetchedBook: $fetchedBook)
         }

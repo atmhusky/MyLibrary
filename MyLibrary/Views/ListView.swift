@@ -22,17 +22,17 @@ struct ListView: View {
     @State var isOpenScanner = false
     @State var isShowAlert = false
     
+    @FocusState var keyboardFocus: Bool
+    
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                
                 List(selection: $selectedBooks) {
                     Section("本の追加") {
                         search
                     }
                     
                     Section("蔵書一覧"){
-                        
                         if books.isEmpty {
                             VStack(alignment: .center) {
                                 Text("書籍が登録されていません")
@@ -120,7 +120,6 @@ struct ListView: View {
 }
 
 #Preview {
-    
     ListView()
         .modelContainer(for: Book.self, inMemory: true)
         .environmentObject(BookViewModel())
@@ -132,27 +131,45 @@ extension ListView {
         VStack(alignment: .leading) {
             HStack {
                 TextField("ISBNコードを入力(13桁の数字)", text: $searchText)
-                    .onSubmit {
-                        print(searchText)
-                        
-                        guard bookViewModel.isValidISBN(searchText) else {
-                            errorMessage = "※入力されたのはISBNコードではありません。\n978から始まる13桁の数字を入力してください。"
-                            return
+                    .keyboardType(.numberPad)
+                    .focused(self.$keyboardFocus)
+                    .onChange(of: searchText) { _, searchText in
+                        if searchText.count == 13 {
+                            print(searchText)
+                            
+                            guard bookViewModel.isValidISBN(searchText) else {
+                                errorMessage = "※入力されたのはISBNコードではありません。\n978から始まる13桁の数字を入力してください。"
+                                return
+                            }
+                            
+                            guard bookViewModel.hasDuplicateBook(isbn: searchText, modelContext: modelContext) else {
+                                errorMessage = "※入力されたISBNコードの書籍は既に登録済みです。"
+                                return
+                            }
+                            
+                            errorMessage = nil
+                            
+                            Task {
+                                do {
+                                    fetchedBook = try await bookViewModel.fetchBook(isbn: searchText)
+                                } catch {
+                                    print("検索したISBNの本は見つかりませんでした：\(error)")
+                                    fetchedBook = bookViewModel.creareEmptyBook(isbn13: searchText)  // 検索した本が見つからない場合は空の登録フォームを表示する
+                                }
+                            }
                         }
-                        
-                        guard bookViewModel.hasDuplicateBook(isbn: searchText, modelContext: modelContext) else {
-                            errorMessage = "※入力されたISBNコードの書籍は既に登録済みです。"
-                            return
-                        }
-                        
-                        errorMessage = nil
-                        
-                        Task {
-                            do {
-                                fetchedBook = try await bookViewModel.fetchBook(isbn: searchText)
-                            } catch {
-                                print("検索したISBNの本は見つかりませんでした：\(error)")
-                                fetchedBook = bookViewModel.creareEmptyBook(isbn13: searchText)  // 検索した本が見つからない場合は空の登録フォームを表示する
+                    }
+                    .toolbar {
+                        ToolbarItem(placement: .keyboard) {
+                            HStack {
+                                Spacer()
+                                
+                                Button {
+                                    keyboardFocus = false
+                                } label: {
+                                    Text(Image(systemName: "keyboard.chevron.compact.down"))
+                                        .foregroundStyle(Color(uiColor: .label))
+                                }
                             }
                         }
                     }

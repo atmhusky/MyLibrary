@@ -144,17 +144,11 @@ extension ListView {
                         if searchText.count == 13 {
                             print(searchText)
                             
-                            guard bookViewModel.isValidISBN(searchText) else {
-                                errorMessage = "※入力されたのはISBNコードではありません。\n978から始まる13桁の数字を入力してください。"
+                            errorMessage = bookViewModel.isRegisterableISBN(searchText: searchText, modelContext: modelContext)
+                            
+                            if errorMessage != nil {
                                 return
                             }
-                            
-                            guard bookViewModel.hasDuplicateBook(isbn: searchText, modelContext: modelContext) else {
-                                errorMessage = "※入力されたISBNコードの書籍は既に登録済みです。"
-                                return
-                            }
-                            
-                            errorMessage = nil
                             
                             Task {
                                 do {

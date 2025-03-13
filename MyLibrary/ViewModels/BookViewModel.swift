@@ -43,6 +43,19 @@ class BookViewModel: ObservableObject {
         }
     }
     
+    // 入力されたコードがISBNコードであり，ユニークであるかをチェック
+    func isRegisterableISBN(searchText: String, modelContext: ModelContext) -> String? {
+        guard isValidISBN(searchText) else {
+            return "※入力されたのはISBNコードではありません。\n978から始まる13桁の数字を入力してください。"
+        }
+        
+        guard hasDuplicateBook(isbn: searchText, modelContext: modelContext) else {
+            return "※入力されたISBNコードの書籍は既に登録済みです。"
+        }
+        
+        return nil
+    }
+    
     // 出版日の形式が正しいかを判定する
     func isValidPublishedDateString(_ publishedDate: String) -> Bool {
         if publishedDate.isEmpty {

@@ -19,6 +19,7 @@ class Book: Identifiable {
     var pageCount: String
     var isbn13: String
     var memo: String
+    var createdAt: Date
     
     init(title: String, subtitle: String, authors: [String], bookDescription: String, publishedDate: String, imageUrlString: String?, pageCount: Int, isbn13: String, memo: String = "") {
         self.id = UUID().uuidString
@@ -31,6 +32,7 @@ class Book: Identifiable {
         self.pageCount = String(pageCount)
         self.isbn13 = isbn13
         self.memo = memo
+        self.createdAt = Date()
         
         // "http" を "https" に置き換え (こうしないと画像が表示されない)
         if let imageUrlString = imageUrlString {

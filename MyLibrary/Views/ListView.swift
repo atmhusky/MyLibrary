@@ -11,7 +11,7 @@ import CodeScanner
 struct ListView: View {
     
     @Environment(\.modelContext) private var modelContext
-    @Query private var books: [Book]
+    @Query(sort: \Book.createdAt, order: .reverse) private var books: [Book]
     @EnvironmentObject var bookViewModel: BookViewModel
     
     @State var searchText = ""

@@ -9,6 +9,22 @@ import SwiftData
 
 class BookViewModel: ObservableObject {
     
+    init() {
+        let sample1 = "2021-12-31"
+        let sample2 = "2021-12-1"
+        let sample3 = "2021-12"
+        let sample4 = "2021"
+        let sample5 = "2021-2-31"
+        let sample6 = "2021-1-22"
+        
+        print(isValidPublishedDateString(sample1))
+        print(isValidPublishedDateString(sample2))
+        print(isValidPublishedDateString(sample3))
+        print(isValidPublishedDateString(sample4))
+        print(isValidPublishedDateString(sample5))
+        print(isValidPublishedDateString(sample6))
+    }
+    
     // Google Books APIで本の情報を取得し，Bookで返す
     func fetchBook(isbn: String) async throws -> Book {
         let urlString = "https://www.googleapis.com/books/v1/volumes?maxResults=1"  // 最上位の検索結果のみ取得
@@ -41,6 +57,34 @@ class BookViewModel: ObservableObject {
         } catch {
             throw error
         }
+    }
+    
+    // 出版日の形式が正しいかを判定する
+    func isValidPublishedDateString(_ publishedDate: String) -> Bool {
+        if publishedDate.isEmpty {
+            return true // 空文字はOK
+        }
+
+        // 年月日 or 年月 or 年 のどれかにマッチしているか
+        let datePatterns = [
+            "yyyy-MM-dd",
+            "yyyy-MM",
+            "yyyy"
+        ]
+
+        for pattern in datePatterns {
+            let formatter = DateFormatter()
+            formatter.dateFormat = pattern
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+            formatter.timeZone = TimeZone(secondsFromGMT: 0)
+            formatter.isLenient = false
+
+            if formatter.date(from: publishedDate) != nil{
+                return true
+            }
+        }
+
+        return false
     }
     
     // 空のBookを生成する

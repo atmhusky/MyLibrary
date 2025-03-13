@@ -34,16 +34,21 @@ struct ListView: View {
                     
                     Section("蔵書一覧"){
                         if books.isEmpty {
-                            VStack(alignment: .center) {
-                                Text("書籍が登録されていません")
-                                    .fontWeight(.bold)
-                                    .font(.title2)
-                                    .padding()
-                                
-                                Text("上の検索バーかバーコードのアイコンをタップして書籍を登録しましょう！")
-                                    .foregroundStyle(.secondary)
-                                    .padding([.leading, .bottom, .trailing])
+                            HStack {
+                                Spacer()
+                                VStack() {
+                                    Text("書籍が登録されていません")
+                                        .fontWeight(.bold)
+                                        .font(.title2)
+                                        .padding()
+                                    
+                                    Text("上の検索バーかバーコードのアイコンをタップして書籍を登録しましょう！")
+                                        .foregroundStyle(.secondary)
+                                        .padding([.leading, .bottom, .trailing])
+                                }
+                                Spacer()
                             }
+                            
                         }
                         
                         ForEach(books) { book in

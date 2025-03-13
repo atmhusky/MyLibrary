@@ -26,7 +26,6 @@ struct ListView: View {
     
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
                 List(selection: $selectedBooks) {
                     Section("本の追加") {
                         search
@@ -34,21 +33,7 @@ struct ListView: View {
                     
                     Section("蔵書一覧"){
                         if books.isEmpty {
-                            HStack {
-                                Spacer()
-                                VStack() {
-                                    Text("書籍が登録されていません")
-                                        .fontWeight(.bold)
-                                        .font(.title2)
-                                        .padding()
-                                    
-                                    Text("上の検索バーかバーコードのアイコンをタップして書籍を登録しましょう！")
-                                        .foregroundStyle(.secondary)
-                                        .padding([.leading, .bottom, .trailing])
-                                }
-                                Spacer()
-                            }
-                            
+                            emptyBook
                         }
                         
                         ForEach(books) { book in
@@ -75,16 +60,16 @@ struct ListView: View {
                         }
                     }
                     
+                    if editMode == .active {
                     ToolbarItem(placement: .topBarLeading) {
-                        if editMode == .active {
                             Button("すべて選択") {
-                                selectAllBooks()
+                                selectedBooks = Set(books.map { $0.id })
                             }
                         }
                     }
                     
+                    if editMode == .active && !selectedBooks.isEmpty {
                     ToolbarItemGroup(placement: .bottomBar) {
-                        if editMode == .active && !selectedBooks.isEmpty {
                             if let csvURL = bookViewModel.exportBooksToCSV(selectedBooks: selectedBooks, modelContext: modelContext) {
                                 ShareLink(item: csvURL) {
                                     Text("CSVへエクスポート")
@@ -111,14 +96,14 @@ struct ListView: View {
                         }
                     }
                 }
-            }
+            
         }
-        .sheet(item: $fetchedBook, onDismiss: {
+        .sheet(item: $fetchedBook, onDismiss: {  // 本の新規登録のモーダル
             searchText = ""
         }, content: { book in
             BookDetailView(book: book, isNewBook: true, isEditing: true)
         })
-        .sheet(isPresented: $isOpenScanner) {
+        .sheet(isPresented: $isOpenScanner) {  // バーコードスキャンのモーダル
             BarcodeScanView(isOpenScanner: $isOpenScanner, fetchedBook: $fetchedBook, errorMessage: $errorMessage)
         }
     }
@@ -131,6 +116,23 @@ struct ListView: View {
 }
 
 extension ListView {
+    
+    private var emptyBook: some View {
+        HStack {
+            Spacer()
+            VStack() {
+                Text("書籍が登録されていません")
+                    .fontWeight(.bold)
+                    .font(.title2)
+                    .padding()
+                
+                Text("上の検索バーかバーコードのアイコンをタップして書籍を登録しましょう！")
+                    .foregroundStyle(.secondary)
+                    .padding([.leading, .bottom, .trailing])
+            }
+            Spacer()
+        }
+    }
     
     private var search: some View {
         VStack(alignment: .leading) {
@@ -197,10 +199,4 @@ extension ListView {
             
         }
     }
-    
-    // すべての本を選択する
-    private func selectAllBooks() {
-        selectedBooks = Set(books.map { $0.id })
-    }
-    
 }

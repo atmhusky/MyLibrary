@@ -10,6 +10,7 @@ enum BookDetail {
     case description
     case isbn
     case pageCount
+    case publishedDate
 }
 
 extension BookDetail {
@@ -22,6 +23,8 @@ extension BookDetail {
             "barcode"
         case .pageCount:
             "book.pages"
+        case .publishedDate:
+            "calendar"
         }
     }
     
@@ -33,6 +36,8 @@ extension BookDetail {
             "ISBN"
         case .pageCount:
             "ページ数"
+        case .publishedDate:
+            "出版日"
         }
     }
     
@@ -44,6 +49,8 @@ extension BookDetail {
             "本のISBNコード"
         case .pageCount:
             "本のページ数"
+        case .publishedDate:
+            "本の出版日"
         }
     }
     
@@ -51,7 +58,7 @@ extension BookDetail {
         switch self {
         case .description:
             true
-        case .isbn, .pageCount:
+        case .isbn, .pageCount, .publishedDate:
             false
         }
     }

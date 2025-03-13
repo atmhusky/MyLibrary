@@ -10,6 +10,8 @@ struct BookDetailView: View {
     
     @Bindable var book: Book
     
+    @State var publishedDateErrorMessage: String = ""
+    
     var isNewBook: Bool = false  // 新規登録であるか
     @State var isEditing: Bool = false // 編集中であるか
     
@@ -30,29 +32,7 @@ struct BookDetailView: View {
                     
                     BookDetailRow(bookDetail: .pageCount, inputText: $book.pageCount, isEditing: isEditing)
                     
-                    // 出版日
-                    HStack(spacing: 10) {
-                        Image(systemName: "calendar")
-                            .imageScale(.large)
-                        
-                        Text("出版日")
-                            .foregroundStyle(.primary)
-                        
-                        Spacer()
-                        
-//                        if isEditing {
-//                            DatePicker("", selection: Binding(
-//                                get: { book.publishedDate ?? Date() },
-//                                set: { newDate in book.publishedDate = newDate }
-//                            ), displayedComponents: .date)
-//                            .datePickerStyle(.compact)
-//                            
-//                        } else {
-//                            Text(book.publishedDate != nil ? formattedDate(book.publishedDate!) : "未指定")
-//                                .lineLimit(nil)
-//                                .foregroundStyle(.secondary)
-//                        }
-                    }
+                    BookDetailRow(bookDetail: .publishedDate, inputText: $book.publishedDate, isEditing: isEditing, errorMessage: publishedDateErrorMessage)
                 }
                 
                 // 自由に記録を残す用のメモ欄
@@ -83,8 +63,14 @@ struct BookDetailView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     if isEditing {
                         Button(isNewBook ? "登録" : "保存") {
-                            isNewBook ? bookViewModel.addBook(book, modelContext: modelContext) : bookViewModel.updateBook(book, modelContext: modelContext)
-                            isNewBook ? dismiss() : isEditing.toggle()
+                            if bookViewModel.isValidPublishedDateString(book.publishedDate) {
+                                publishedDateErrorMessage = ""
+                                isNewBook ? bookViewModel.addBook(book, modelContext: modelContext) : bookViewModel.updateBook(book, modelContext: modelContext)
+                                isNewBook ? dismiss() : isEditing.toggle()
+                                
+                            } else {
+                                publishedDateErrorMessage = "入力値が不正です。"
+                            }
                         }
                     } else {
                         Button("編集") {
@@ -112,14 +98,4 @@ struct BookDetailView: View {
         )
     )
     .modelContainer(for: Book.self, inMemory: true)
-}
-
-extension BookDetailView {
-    
-    private func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy/MM/dd"
-        return formatter.string(from: date)
-    }
-    
 }

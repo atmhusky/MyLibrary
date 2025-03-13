@@ -43,6 +43,34 @@ class BookViewModel: ObservableObject {
         }
     }
     
+    // 出版日の形式が正しいかを判定する
+    func isValidPublishedDateString(_ publishedDate: String) -> Bool {
+        if publishedDate.isEmpty {
+            return true // 空文字はOK
+        }
+
+        // 年月日 or 年月 or 年 のどれかにマッチしているか
+        let datePatterns = [
+            "yyyy-MM-dd",
+            "yyyy-MM",
+            "yyyy"
+        ]
+
+        for pattern in datePatterns {
+            let formatter = DateFormatter()
+            formatter.dateFormat = pattern
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+            formatter.timeZone = TimeZone(secondsFromGMT: 0)
+            formatter.isLenient = false
+
+            if formatter.date(from: publishedDate) != nil{
+                return true
+            }
+        }
+
+        return false
+    }
+    
     // 空のBookを生成する
     func creareEmptyBook(isbn13: String) -> Book {
         Book(title: "", subtitle: "", authors: [], bookDescription: "", publishedDate: "", imageUrlString: "", pageCount: 0, isbn13: isbn13)
@@ -71,7 +99,7 @@ class BookViewModel: ObservableObject {
         }
     }
     
-    //
+    // 選択した本の情報をCSV形式に変換し，URLを返す
     func exportBooksToCSV(selectedBooks: Set<String> ,modelContext: ModelContext) -> URL? {
         
         if let csvString = generateCSV(selectedBooks: selectedBooks, modelContext: modelContext) {

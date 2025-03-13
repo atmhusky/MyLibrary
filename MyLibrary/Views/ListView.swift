@@ -108,9 +108,6 @@ struct ListView: View {
                 }
             }
         }
-        .onTapGesture {
-            keyboardFocus = false
-        }
         .sheet(item: $fetchedBook, onDismiss: {
             searchText = ""
         }, content: { book in
@@ -123,7 +120,6 @@ struct ListView: View {
 }
 
 #Preview {
-    
     ListView()
         .modelContainer(for: Book.self, inMemory: true)
         .environmentObject(BookViewModel())
@@ -159,6 +155,20 @@ extension ListView {
                                 } catch {
                                     print("検索したISBNの本は見つかりませんでした：\(error)")
                                     fetchedBook = bookViewModel.creareEmptyBook(isbn13: searchText)  // 検索した本が見つからない場合は空の登録フォームを表示する
+                                }
+                            }
+                        }
+                    }
+                    .toolbar {
+                        ToolbarItem(placement: .keyboard) {
+                            HStack {
+                                Spacer()
+                                
+                                Button {
+                                    keyboardFocus = false
+                                } label: {
+                                    Text(Image(systemName: "keyboard.chevron.compact.down"))
+                                        .foregroundStyle(Color(uiColor: .label))
                                 }
                             }
                         }

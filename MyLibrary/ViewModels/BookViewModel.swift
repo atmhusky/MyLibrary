@@ -9,22 +9,6 @@ import SwiftData
 
 class BookViewModel: ObservableObject {
     
-    init() {
-        let sample1 = "2021-12-31"
-        let sample2 = "2021-12-1"
-        let sample3 = "2021-12"
-        let sample4 = "2021"
-        let sample5 = "2021-2-31"
-        let sample6 = "2021-1-22"
-        
-        print(isValidPublishedDateString(sample1))
-        print(isValidPublishedDateString(sample2))
-        print(isValidPublishedDateString(sample3))
-        print(isValidPublishedDateString(sample4))
-        print(isValidPublishedDateString(sample5))
-        print(isValidPublishedDateString(sample6))
-    }
-    
     // Google Books APIで本の情報を取得し，Bookで返す
     func fetchBook(isbn: String) async throws -> Book {
         let urlString = "https://www.googleapis.com/books/v1/volumes?maxResults=1"  // 最上位の検索結果のみ取得
@@ -115,7 +99,7 @@ class BookViewModel: ObservableObject {
         }
     }
     
-    //
+    // 選択した本の情報をCSV形式に変換し，URLを返す
     func exportBooksToCSV(selectedBooks: Set<String> ,modelContext: ModelContext) -> URL? {
         
         if let csvString = generateCSV(selectedBooks: selectedBooks, modelContext: modelContext) {

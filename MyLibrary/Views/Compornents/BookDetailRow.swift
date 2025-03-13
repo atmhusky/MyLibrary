@@ -11,6 +11,7 @@ struct BookDetailRow: View {
     let bookDetail: BookDetail
     @Binding var inputText: String
     let isEditing: Bool
+    var errorMessage = ""
     
     var body: some View {
         HStack(spacing: 10) {
@@ -23,8 +24,23 @@ struct BookDetailRow: View {
             Spacer()
             
             if isEditing {
-                TextField(bookDetail.textFieldText, text: $inputText, axis: .vertical)
-                    .lineLimit(bookDetail.permitNewline ? nil : 1)
+                VStack(alignment: .leading) {
+                    TextField(bookDetail.textFieldText, text: $inputText, axis: .vertical)
+                        .lineLimit(bookDetail.permitNewline ? nil : 1)
+                        .multilineTextAlignment(bookDetail.permitNewline ? .leading : .trailing)
+                    
+                    if bookDetail == .publishedDate {
+                        Text("※日付は yyyy-MM-dd, yyyy-MM, yyyy 形式のいずれかで入力")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                    
+                    if !errorMessage.isEmpty {
+                        Text(errorMessage)
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                    }
+                }
             } else {
                 Text(inputText)
                     .lineLimit(bookDetail.permitNewline ? nil : 1)
@@ -36,5 +52,5 @@ struct BookDetailRow: View {
 
 #Preview {
     @Previewable @State var inputText: String = "テキスト"
-    BookDetailRow(bookDetail: .description, inputText: $inputText, isEditing: false)
+    BookDetailRow(bookDetail: .publishedDate, inputText: $inputText, isEditing: true)
 }

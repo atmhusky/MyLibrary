@@ -11,7 +11,7 @@ struct BookDetailRow: View {
     let bookDetail: BookDetail
     @Binding var inputText: String
     let isEditing: Bool
-    var errorMessage = ""
+    var errorMessage: String?
     
     var body: some View {
         HStack(spacing: 10) {
@@ -35,7 +35,7 @@ struct BookDetailRow: View {
                             .foregroundStyle(.secondary)
                     }
                     
-                    if !errorMessage.isEmpty {
+                    if let errorMessage = errorMessage {
                         Text(errorMessage)
                             .font(.footnote)
                             .foregroundStyle(.red)

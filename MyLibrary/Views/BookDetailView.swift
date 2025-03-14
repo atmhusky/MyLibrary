@@ -10,7 +10,8 @@ struct BookDetailView: View {
     
     @Bindable var book: Book
     
-    @State var publishedDateErrorMessage: String = ""
+    @State var publishedDateErrorMessage: String?
+    @State var isbnErrorMessage: String?
     
     var isNewBook: Bool = false  // 新規登録であるか
     @State var isEditing: Bool = false // 編集中であるか
@@ -26,7 +27,7 @@ struct BookDetailView: View {
                     
                     BookDetailRow(bookDetail: .description, inputText: $book.bookDescription, isEditing: isEditing)
                     
-                    BookDetailRow(bookDetail: .isbn, inputText: $book.isbn13, isEditing: isEditing)
+                    BookDetailRow(bookDetail: .isbn, inputText: $book.isbn13, isEditing: isEditing, errorMessage: isbnErrorMessage)
                     
                     BookDetailRow(bookDetail: .pageCount, inputText: $book.pageCount, isEditing: isEditing)
                     
@@ -59,13 +60,12 @@ struct BookDetailView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     if isEditing {
                         Button(isNewBook ? "登録" : "保存") {
-                            if bookViewModel.isValidPublishedDateString(book.publishedDate) {
-                                publishedDateErrorMessage = ""
+                            isbnErrorMessage = bookViewModel.isRegisterableISBN(searchText: book.isbn13, modelContext: modelContext)
+                            publishedDateErrorMessage = bookViewModel.isValidPublishedDateString(book.publishedDate) ? nil : "入力値が規定通りではありません。"
+                            if (isbnErrorMessage == nil) && (publishedDateErrorMessage == nil) {
                                 isNewBook ? bookViewModel.addBook(book, modelContext: modelContext) : bookViewModel.updateBook(book, modelContext: modelContext)
                                 isNewBook ? dismiss() : isEditing.toggle()
                                 
-                            } else {
-                                publishedDateErrorMessage = "入力値が不正です。"
                             }
                         }
                     } else {

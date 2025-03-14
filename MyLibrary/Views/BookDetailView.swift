@@ -18,12 +18,10 @@ struct BookDetailView: View {
     var body: some View {
         NavigationStack {
             List {
-                // 本の基本情報
                 Section {
                     BookOverview(book: book, isEditing: isEditing)
                 }
                 
-                // 本の詳細情報
                 Section("本の詳細情報") {
                     
                     BookDetailRow(bookDetail: .description, inputText: $book.bookDescription, isEditing: isEditing)
@@ -35,7 +33,6 @@ struct BookDetailView: View {
                     BookDetailRow(bookDetail: .publishedDate, inputText: $book.publishedDate, isEditing: isEditing, errorMessage: publishedDateErrorMessage)
                 }
                 
-                // 自由に記録を残す用のメモ欄
                 Section("メモ") {
                     if isEditing {
                         TextField("好きなことをメモしておこう", text: $book.memo, axis: .vertical)
@@ -54,7 +51,6 @@ struct BookDetailView: View {
                 ToolbarItem(placement: .topBarLeading) {
                     if isEditing {
                         Button("キャンセル") {
-                            print("キャンセル")
                             isNewBook ? dismiss() : isEditing.toggle()
                         }
                     }

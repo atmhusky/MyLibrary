@@ -33,27 +33,14 @@ class BookViewModel: ObservableObject {
                 authors: bookItem.volumeInfo.authors ?? [],
                 bookDescription: bookItem.volumeInfo.description ?? "",
                 publishedDate: bookItem.volumeInfo.publishedDate,
-                imageUrlString: bookItem.volumeInfo.imageLinks?.thumbnail ?? nil,  // 高画質のサムネイルのURL
+                imageUrlString: bookItem.volumeInfo.imageLinks?.thumbnail ?? nil,
                 pageCount: bookItem.volumeInfo.pageCount,
-                isbn13: bookItem.volumeInfo.industryIdentifiers[1].identifier  // 13桁のISBNコード
+                isbn13: bookItem.volumeInfo.industryIdentifiers[1].identifier
             )
             return book
         } catch {
             throw error
         }
-    }
-    
-    // 入力されたコードがISBNコードであり，ユニークであるかをチェック
-    func isRegisterableISBN(searchText: String, modelContext: ModelContext) -> String? {
-        guard isValidISBN(searchText) else {
-            return "※入力されたのはISBNコードではありません。\n978から始まる13桁の数字を入力してください。"
-        }
-        
-        guard hasDuplicateBook(isbn: searchText, modelContext: modelContext) else {
-            return "※入力されたISBNコードの書籍は既に登録済みです。"
-        }
-        
-        return nil
     }
     
     // 出版日の形式が正しいかを判定する
@@ -104,6 +91,7 @@ class BookViewModel: ObservableObject {
     // 選択した本を削除する
     func deleteBooks(selectedBooks: Set<String> ,modelContext: ModelContext) {
         print("削除する本: \(selectedBooks)")
+        
         if let books = fetchBooksById(ids: selectedBooks, modelContext: modelContext) {
             for book in books {
                 modelContext.delete(book)
@@ -114,7 +102,6 @@ class BookViewModel: ObservableObject {
     
     // 選択した本の情報をCSV形式に変換し，URLを返す
     func exportBooksToCSV(selectedBooks: Set<String> ,modelContext: ModelContext) -> URL? {
-        
         if let csvString = generateCSV(selectedBooks: selectedBooks, modelContext: modelContext) {
             let fileName = "MyLibrary.csv"
             let tmpURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
@@ -170,6 +157,19 @@ class BookViewModel: ObservableObject {
             print("指定したidの検索に失敗しました：\(error)")
             return nil
         }
+    }
+    
+    // 入力されたコードがISBNコードであり，ユニークであるかをチェック
+    func isRegisterableISBN(searchText: String, modelContext: ModelContext) -> String? {
+        guard isValidISBN(searchText) else {
+            return "※入力されたのはISBNコードではありません。\n978から始まる13桁の数字を入力してください。"
+        }
+        
+        guard hasDuplicateBook(isbn: searchText, modelContext: modelContext) else {
+            return "※入力されたISBNコードの書籍は既に登録済みです。"
+        }
+        
+        return nil
     }
     
     // 入力値のチェック (13桁の数字であるかどうかの判定)

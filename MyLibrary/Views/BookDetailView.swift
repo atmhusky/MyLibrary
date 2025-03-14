@@ -60,12 +60,13 @@ struct BookDetailView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     if isEditing {
                         Button(isNewBook ? "登録" : "保存") {
-                            isbnErrorMessage = bookViewModel.isRegisterableISBN(searchText: book.isbn13, modelContext: modelContext)
+                            if isNewBook {
+                                isbnErrorMessage = bookViewModel.isRegisterableISBN(searchText: book.isbn13, modelContext: modelContext)
+                            }
                             publishedDateErrorMessage = bookViewModel.isValidPublishedDateString(book.publishedDate) ? nil : "入力値が規定通りではありません。"
                             if (isbnErrorMessage == nil) && (publishedDateErrorMessage == nil) {
                                 isNewBook ? bookViewModel.addBook(book, modelContext: modelContext) : bookViewModel.updateBook(book, modelContext: modelContext)
                                 isNewBook ? dismiss() : isEditing.toggle()
-                                
                             }
                         }
                     } else {

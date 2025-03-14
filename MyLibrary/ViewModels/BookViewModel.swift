@@ -23,7 +23,7 @@ class BookViewModel: ObservableObject {
             let bookItem = response.items[0]  // 検索結果は配列になるが，1件しか取得していないので0番で固定
             
             // 最上位の検索結果が異なる本であった場合は見つからなかったと判定する (API変更の検討の余地あり)
-            guard bookItem.volumeInfo.industryIdentifiers.first(where: { $0.type == "ISBN_13" && $0.identifier == isbn }) != nil else {
+            guard let isbn13Identifier = bookItem.volumeInfo.industryIdentifiers.first(where: { $0.type == "ISBN_13" && $0.identifier == isbn })?.identifier else {
                 throw NSError(domain: "BookViewModel", code: 0, userInfo: [NSLocalizedDescriptionKey: "入力と異なる本が取得されました"])
             }
             
@@ -35,7 +35,7 @@ class BookViewModel: ObservableObject {
                 publishedDate: bookItem.volumeInfo.publishedDate,
                 imageUrlString: bookItem.volumeInfo.imageLinks?.thumbnail ?? nil,
                 pageCount: bookItem.volumeInfo.pageCount,
-                isbn13: bookItem.volumeInfo.industryIdentifiers[1].identifier
+                isbn13: isbn13Identifier
             )
             return book
         } catch {

@@ -4,13 +4,13 @@ import SwiftData
 struct BookDetailView: View {
     
     @Environment(\.modelContext) private var modelContext
-    @Query private var books: [Book]
     @EnvironmentObject var bookViewModel: BookViewModel
     @Environment(\.dismiss) private var dismiss
     
     @Bindable var book: Book
     
-    @State var publishedDateErrorMessage: String = ""
+    @State var publishedDateErrorMessage: String?
+    @State var isbnErrorMessage: String?
     
     var isNewBook: Bool = false  // 新規登録であるか
     @State var isEditing: Bool = false // 編集中であるか
@@ -18,24 +18,21 @@ struct BookDetailView: View {
     var body: some View {
         NavigationStack {
             List {
-                // 本の基本情報
                 Section {
                     BookOverview(book: book, isEditing: isEditing)
                 }
                 
-                // 本の詳細情報
                 Section("本の詳細情報") {
                     
                     BookDetailRow(bookDetail: .description, inputText: $book.bookDescription, isEditing: isEditing)
                     
-                    BookDetailRow(bookDetail: .isbn, inputText: $book.isbn13, isEditing: isEditing)
+                    BookDetailRow(bookDetail: .isbn, inputText: $book.isbn13, isEditing: isEditing, errorMessage: isbnErrorMessage)
                     
                     BookDetailRow(bookDetail: .pageCount, inputText: $book.pageCount, isEditing: isEditing)
                     
                     BookDetailRow(bookDetail: .publishedDate, inputText: $book.publishedDate, isEditing: isEditing, errorMessage: publishedDateErrorMessage)
                 }
                 
-                // 自由に記録を残す用のメモ欄
                 Section("メモ") {
                     if isEditing {
                         TextField("好きなことをメモしておこう", text: $book.memo, axis: .vertical)
@@ -51,10 +48,9 @@ struct BookDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(isEditing)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    if isEditing {
+                if isEditing {
+                    ToolbarItem(placement: .topBarLeading) {
                         Button("キャンセル") {
-                            print("キャンセル")
                             isNewBook ? dismiss() : isEditing.toggle()
                         }
                     }
@@ -63,13 +59,13 @@ struct BookDetailView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     if isEditing {
                         Button(isNewBook ? "登録" : "保存") {
-                            if bookViewModel.isValidPublishedDateString(book.publishedDate) {
-                                publishedDateErrorMessage = ""
+                            if isNewBook {
+                                isbnErrorMessage = bookViewModel.checkRegisterableISBN(searchText: book.isbn13, modelContext: modelContext)
+                            }
+                            publishedDateErrorMessage = bookViewModel.isValidPublishedDateString(book.publishedDate) ? nil : "入力値が規定通りではありません。"
+                            if (isbnErrorMessage == nil) && (publishedDateErrorMessage == nil) {
                                 isNewBook ? bookViewModel.addBook(book, modelContext: modelContext) : bookViewModel.updateBook(book, modelContext: modelContext)
                                 isNewBook ? dismiss() : isEditing.toggle()
-                                
-                            } else {
-                                publishedDateErrorMessage = "入力値が不正です。"
                             }
                         }
                     } else {

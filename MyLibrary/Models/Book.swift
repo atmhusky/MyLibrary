@@ -28,7 +28,6 @@ class Book: Identifiable {
         self.authors = authors.joined(separator: ", ")
         self.bookDescription = bookDescription
         self.publishedDate = publishedDate
-//        self.imageUrl = URL(string: imageUrlString)
         self.pageCount = String(pageCount)
         self.isbn13 = isbn13
         self.memo = memo

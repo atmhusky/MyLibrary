@@ -23,7 +23,7 @@ class BookViewModel: ObservableObject {
             let bookItem = response.items[0]  // 検索結果は配列になるが，1件しか取得していないので0番で固定
             
             // 最上位の検索結果が異なる本であった場合は見つからなかったと判定する (API変更の検討の余地あり)
-            guard bookItem.volumeInfo.industryIdentifiers.first(where: { $0.type == "ISBN_13" && $0.identifier == isbn }) != nil else {
+            guard let isbn13Identifier = bookItem.volumeInfo.industryIdentifiers.first(where: { $0.type == "ISBN_13" && $0.identifier == isbn })?.identifier else {
                 throw NSError(domain: "BookViewModel", code: 0, userInfo: [NSLocalizedDescriptionKey: "入力と異なる本が取得されました"])
             }
             
@@ -33,9 +33,9 @@ class BookViewModel: ObservableObject {
                 authors: bookItem.volumeInfo.authors ?? [],
                 bookDescription: bookItem.volumeInfo.description ?? "",
                 publishedDate: bookItem.volumeInfo.publishedDate,
-                imageUrlString: bookItem.volumeInfo.imageLinks?.thumbnail ?? nil,  // 高画質のサムネイルのURL
+                imageUrlString: bookItem.volumeInfo.imageLinks?.thumbnail ?? nil,
                 pageCount: bookItem.volumeInfo.pageCount,
-                isbn13: bookItem.volumeInfo.industryIdentifiers[1].identifier  // 13桁のISBNコード
+                isbn13: isbn13Identifier
             )
             return book
         } catch {
@@ -91,6 +91,7 @@ class BookViewModel: ObservableObject {
     // 選択した本を削除する
     func deleteBooks(selectedBooks: Set<String> ,modelContext: ModelContext) {
         print("削除する本: \(selectedBooks)")
+        
         if let books = fetchBooksById(ids: selectedBooks, modelContext: modelContext) {
             for book in books {
                 modelContext.delete(book)
@@ -101,7 +102,6 @@ class BookViewModel: ObservableObject {
     
     // 選択した本の情報をCSV形式に変換し，URLを返す
     func exportBooksToCSV(selectedBooks: Set<String> ,modelContext: ModelContext) -> URL? {
-        
         if let csvString = generateCSV(selectedBooks: selectedBooks, modelContext: modelContext) {
             let fileName = "MyLibrary.csv"
             let tmpURL = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
@@ -116,6 +116,19 @@ class BookViewModel: ObservableObject {
         } else {
             return nil
         }
+    }
+    
+    // 入力されたコードがISBNコードであり，ユニークであるかをチェック
+    func checkRegisterableISBN(searchText: String, modelContext: ModelContext) -> String? {
+        guard isValidISBN(searchText) else {
+            return "※入力されたのはISBNコードではありません。\n978から始まる13桁の数字を入力してください。"
+        }
+        
+        guard hasDuplicateBook(isbn: searchText, modelContext: modelContext) else {
+            return "※入力されたISBNコードの書籍は既に登録済みです。"
+        }
+        
+        return nil
     }
     
     // 選択した本をCSV形式の文字列として生成する
@@ -160,7 +173,7 @@ class BookViewModel: ObservableObject {
     }
     
     // 入力値のチェック (13桁の数字であるかどうかの判定)
-    func isValidISBN(_ searchText: String) -> Bool {
+    private func isValidISBN(_ searchText: String) -> Bool {
         let regex = #"^\d{13}$"#
         guard searchText.range(of: regex, options: .regularExpression) != nil else {
             return false
@@ -169,7 +182,7 @@ class BookViewModel: ObservableObject {
     }
     
     // 登録しようとしている本のISBNコードが重複しているかを判定
-    func hasDuplicateBook(isbn: String, modelContext: ModelContext) -> Bool {
+    private func hasDuplicateBook(isbn: String, modelContext: ModelContext) -> Bool {
         let descriptor = FetchDescriptor<Book>(
             predicate: #Predicate { $0.isbn13 == isbn }
         )

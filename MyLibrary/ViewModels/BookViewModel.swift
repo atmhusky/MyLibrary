@@ -118,6 +118,19 @@ class BookViewModel: ObservableObject {
         }
     }
     
+    // 入力されたコードがISBNコードであり，ユニークであるかをチェック
+    func checkRegisterableISBN(searchText: String, modelContext: ModelContext) -> String? {
+        guard isValidISBN(searchText) else {
+            return "※入力されたのはISBNコードではありません。\n978から始まる13桁の数字を入力してください。"
+        }
+        
+        guard hasDuplicateBook(isbn: searchText, modelContext: modelContext) else {
+            return "※入力されたISBNコードの書籍は既に登録済みです。"
+        }
+        
+        return nil
+    }
+    
     // 選択した本をCSV形式の文字列として生成する
     private func generateCSV(selectedBooks: Set<String> ,modelContext: ModelContext) -> String? {
         print("エクスポートする本: \(selectedBooks)")
@@ -159,21 +172,8 @@ class BookViewModel: ObservableObject {
         }
     }
     
-    // 入力されたコードがISBNコードであり，ユニークであるかをチェック
-    func isRegisterableISBN(searchText: String, modelContext: ModelContext) -> String? {
-        guard isValidISBN(searchText) else {
-            return "※入力されたのはISBNコードではありません。\n978から始まる13桁の数字を入力してください。"
-        }
-        
-        guard hasDuplicateBook(isbn: searchText, modelContext: modelContext) else {
-            return "※入力されたISBNコードの書籍は既に登録済みです。"
-        }
-        
-        return nil
-    }
-    
     // 入力値のチェック (13桁の数字であるかどうかの判定)
-    func isValidISBN(_ searchText: String) -> Bool {
+    private func isValidISBN(_ searchText: String) -> Bool {
         let regex = #"^\d{13}$"#
         guard searchText.range(of: regex, options: .regularExpression) != nil else {
             return false
@@ -182,7 +182,7 @@ class BookViewModel: ObservableObject {
     }
     
     // 登録しようとしている本のISBNコードが重複しているかを判定
-    func hasDuplicateBook(isbn: String, modelContext: ModelContext) -> Bool {
+    private func hasDuplicateBook(isbn: String, modelContext: ModelContext) -> Bool {
         let descriptor = FetchDescriptor<Book>(
             predicate: #Predicate { $0.isbn13 == isbn }
         )

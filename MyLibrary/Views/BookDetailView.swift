@@ -4,7 +4,6 @@ import SwiftData
 struct BookDetailView: View {
     
     @Environment(\.modelContext) private var modelContext
-    @Query private var books: [Book]
     @EnvironmentObject var bookViewModel: BookViewModel
     @Environment(\.dismiss) private var dismiss
     
@@ -49,8 +48,8 @@ struct BookDetailView: View {
             .navigationBarTitleDisplayMode(.inline)
             .navigationBarBackButtonHidden(isEditing)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    if isEditing {
+                if isEditing {
+                    ToolbarItem(placement: .topBarLeading) {
                         Button("キャンセル") {
                             isNewBook ? dismiss() : isEditing.toggle()
                         }
@@ -61,7 +60,7 @@ struct BookDetailView: View {
                     if isEditing {
                         Button(isNewBook ? "登録" : "保存") {
                             if isNewBook {
-                                isbnErrorMessage = bookViewModel.isRegisterableISBN(searchText: book.isbn13, modelContext: modelContext)
+                                isbnErrorMessage = bookViewModel.checkRegisterableISBN(searchText: book.isbn13, modelContext: modelContext)
                             }
                             publishedDateErrorMessage = bookViewModel.isValidPublishedDateString(book.publishedDate) ? nil : "入力値が規定通りではありません。"
                             if (isbnErrorMessage == nil) && (publishedDateErrorMessage == nil) {

@@ -26,50 +26,50 @@ struct ListView: View {
     
     var body: some View {
         NavigationStack {
-                List(selection: $selectedBooks) {
-                    Section("本の追加") {
-                        search
+            List(selection: $selectedBooks) {
+                Section("本の追加") {
+                    search
+                }
+                
+                Section("蔵書一覧"){
+                    if books.isEmpty {
+                        emptyBook
                     }
                     
-                    Section("蔵書一覧"){
-                        if books.isEmpty {
-                            emptyBook
-                        }
-                        
-                        ForEach(books) { book in
-                            if editMode == .active {
+                    ForEach(books) { book in
+                        if editMode == .active {
+                            BookOverview(book: book)
+                        } else {
+                            NavigationLink {
+                                BookDetailView(book: book)
+                            } label: {
                                 BookOverview(book: book)
-                            } else {
-                                NavigationLink {
-                                    BookDetailView(book: book)
-                                } label: {
-                                    BookOverview(book: book)
-                                }
                             }
                         }
                     }
                 }
-                .listStyle(.insetGrouped)
-                .environment(\.editMode, $editMode)
-                .navigationTitle("MyLibraty")
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button(editMode == .active ? "完了" : "選択") {
-                            editMode = editMode == .active ? .inactive : .active
-                            selectedBooks = []
-                        }
+            }
+            .listStyle(.insetGrouped)
+            .environment(\.editMode, $editMode)
+            .navigationTitle("MyLibrary")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(editMode == .active ? "完了" : "選択") {
+                        editMode = editMode == .active ? .inactive : .active
+                        selectedBooks = []
                     }
-                    
-                    if editMode == .active {
+                }
+                
+                if editMode == .active {
                     ToolbarItem(placement: .topBarLeading) {
-                            Button("すべて選択") {
-                                selectedBooks = Set(books.map { $0.id })
-                            }
+                        Button("すべて選択") {
+                            selectedBooks = Set(books.map { $0.id })
                         }
                     }
                     
-                    if editMode == .active && !selectedBooks.isEmpty {
-                    ToolbarItemGroup(placement: .bottomBar) {
+                    
+                    if !selectedBooks.isEmpty {
+                        ToolbarItemGroup(placement: .bottomBar) {
                             if let csvURL = bookViewModel.exportBooksToCSV(selectedBooks: selectedBooks, modelContext: modelContext) {
                                 ShareLink(item: csvURL) {
                                     Text("CSVへエクスポート")
@@ -96,6 +96,7 @@ struct ListView: View {
                         }
                     }
                 }
+            }
             
         }
         .sheet(item: $fetchedBook, onDismiss: {  // 本の新規登録のモーダル
@@ -120,7 +121,7 @@ extension ListView {
     private var emptyBook: some View {
         HStack {
             Spacer()
-            VStack() {
+            VStack {
                 Text("書籍が登録されていません")
                     .fontWeight(.bold)
                     .font(.title2)
@@ -140,25 +141,23 @@ extension ListView {
                 TextField("ISBNコードを入力(13桁の数字)", text: $searchText)
                     .keyboardType(.numberPad)
                     .focused(self.$keyboardFocus)
-                    .onChange(of: searchText) { _, searchText in
-                        if searchText.count == 13 {
-                            print(searchText)
-                            
-                            errorMessage = bookViewModel.isRegisterableISBN(searchText: searchText, modelContext: modelContext)
-                            
-                            if errorMessage != nil {
-                                return
-                            }
-                            
-                            Task {
-                                do {
-                                    fetchedBook = try await bookViewModel.fetchBook(isbn: searchText)
-                                } catch {
-                                    print("検索したISBNの本は見つかりませんでした：\(error)")
-                                    fetchedBook = bookViewModel.creareEmptyBook(isbn13: searchText)  // 検索した本が見つからない場合は空の登録フォームを表示する
-                                }
+                    .onChange(of: searchText) { _, newValue in
+                        guard newValue.count == 13 else { return }
+                        
+                        print(newValue)
+                        
+                        errorMessage = bookViewModel.checkRegisterableISBN(searchText: newValue, modelContext: modelContext)
+                        guard errorMessage == nil else { return }
+                        
+                        Task {
+                            do {
+                                fetchedBook = try await bookViewModel.fetchBook(isbn: searchText)
+                            } catch {
+                                print("検索したISBNの本は見つかりませんでした：\(error)")
+                                fetchedBook = bookViewModel.creareEmptyBook(isbn13: searchText)  // 検索した本が見つからない場合は空の登録フォームを表示する
                             }
                         }
+                        
                     }
                     .toolbar {
                         ToolbarItem(placement: .keyboard) {

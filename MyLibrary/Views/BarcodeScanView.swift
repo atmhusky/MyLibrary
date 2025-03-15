@@ -29,7 +29,7 @@ struct BarcodeScanView: View {
                         let scannedCode = result.string
                         isOpenScanner = false
                         
-                        errorMessage = bookViewModel.isRegisterableISBN(searchText: scannedCode, modelContext: modelContext)
+                        errorMessage = bookViewModel.checkRegisterableISBN(searchText: scannedCode, modelContext: modelContext)
                         
                         if errorMessage != nil {
                             return

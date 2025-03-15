@@ -8,14 +8,8 @@ import SwiftUI
 
 struct BookOverview: View {
     
-//    @Binding var title: String
-//    @Binding var subTitle: String
-//    @Binding var author: String
-//    var thumbnailURL: URL? = nil
-    
     @Bindable var book: Book
-    
-    var permitNewline: Bool = false
+
     var isEditing: Bool = false
     
     var body: some View {
@@ -48,20 +42,28 @@ struct BookOverview: View {
                     TextField("著者を入力", text: $book.authors, axis: .vertical)
                         .font(.caption)
                 } else {
-                    Text(book.title)
-                        .font(.body)
-                        .lineLimit(permitNewline ? nil : 1)
-                    
-                    if book.subtitle != "" {
-                        Text(book.subtitle)
-                            .font(.caption)
-                            .lineLimit(permitNewline ? nil : 1)
+                    ScrollView(.horizontal) {
+                        Text(book.title)
+                            .font(.body)
+                            .lineLimit(1)
                     }
                     
-                    Text(book.authors)
-                        .font(.caption)
-                        .lineLimit(permitNewline ? nil : 1)
-                        .foregroundStyle(.secondary)
+                    ScrollView(.horizontal) {
+                        if book.subtitle != "" {
+                            Text(book.subtitle)
+                                .font(.caption)
+                                .lineLimit(1)
+                        }
+                    }
+                    .padding(.top, -5)
+                    
+                    ScrollView(.horizontal) {
+                        Text(book.authors)
+                            .font(.caption)
+                            .lineLimit(1)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.top, -3)
                 }
             }
             .padding(.leading)
@@ -71,8 +73,8 @@ struct BookOverview: View {
 
 #Preview {
     let sampleBook = Book(
-                          title: "タイトル",
-                          subtitle: "サブタイトル",
+                          title: "タイトルタイトルタイトルタイトルタイトルタイトル",
+                          subtitle: "サブタイトルサブタイトルサブタイトルサブタイトルサブタイトル",
                           authors: ["著者1", "著者2"],
                           bookDescription: "本の説明文",
                           publishedDate: "2020-11",

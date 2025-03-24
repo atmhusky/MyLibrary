@@ -19,7 +19,7 @@ struct BookDetailView: View {
         NavigationStack {
             List {
                 Section {
-                    BookOverview(book: book, isEditing: isEditing)
+                    BookOverview(book: book, isEditing: isEditing, canScroll: true)
                 }
                 
                 Section("本の詳細情報") {

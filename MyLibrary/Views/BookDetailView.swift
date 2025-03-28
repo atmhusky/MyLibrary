@@ -69,8 +69,17 @@ struct BookDetailView: View {
                             }
                         }
                     } else {
-                        Button("編集") {
-                            isEditing.toggle()
+                        HStack {
+                            let shareText =  "おすすめの本を紹介します：\n\(book.authors)「\(book.title) \(book.subtitle)」  (ISBN:\(book.isbn13))"
+                            ShareLink(item: shareText) {
+                                Image(systemName: "square.and.arrow.up")
+                            }
+                            
+                            Button {
+                                isEditing.toggle()
+                            } label: {
+                                Image(systemName: "square.and.pencil")
+                            }
                         }
                     }
                 }

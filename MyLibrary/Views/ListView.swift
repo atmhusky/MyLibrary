@@ -11,9 +11,10 @@ import CodeScanner
 struct ListView: View {
     
     @Environment(\.modelContext) private var modelContext
-    @Query(sort: \Book.createdAt, order: .reverse) private var books: [Book]
+    @Query private var books: [Book]
     @EnvironmentObject var bookViewModel: BookViewModel
     
+    @State var selectedSortOption: SortOption = .createdDescending
     @State var searchText = ""
     @State var selectedBooks: Set<String> = []
     @State var editMode: EditMode = .inactive
@@ -23,7 +24,7 @@ struct ListView: View {
     @State var isShowAlert = false
     
     @FocusState var keyboardFocus: Bool
-    
+ 
     var body: some View {
         NavigationStack {
             List(selection: $selectedBooks) {
@@ -34,18 +35,8 @@ struct ListView: View {
                 Section("蔵書一覧"){
                     if books.isEmpty {
                         emptyBook
-                    }
-                    
-                    ForEach(books) { book in
-                        if editMode == .active {
-                            BookOverview(book: book)
-                        } else {
-                            NavigationLink {
-                                BookDetailView(book: book)
-                            } label: {
-                                BookOverview(book: book)
-                            }
-                        }
+                    } else {
+                        BookList(editMode: $editMode, selectedSortOption: $selectedSortOption)
                     }
                 }
             }
@@ -54,9 +45,21 @@ struct ListView: View {
             .navigationTitle("MyLibrary")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(editMode == .active ? "完了" : "選択") {
-                        editMode = editMode == .active ? .inactive : .active
-                        selectedBooks = []
+                    HStack {
+                        Button(editMode == .active ? "完了" : "選択") {
+                            editMode = editMode == .active ? .inactive : .active
+                            selectedBooks = []
+                        }
+                        
+                        Menu {
+                            Picker("表示順", selection: $selectedSortOption) {
+                                ForEach(SortOption.allCases) { option in
+                                    Text(option.id).tag(option)
+                                }
+                            }
+                        } label: {
+                            Image(systemName: "list.bullet")
+                        }
                     }
                 }
                 
